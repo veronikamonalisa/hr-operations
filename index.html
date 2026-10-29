@@ -33,6 +33,12 @@
       <a href="#" class="nav-item" onclick="showSection('performance')">
         <span class="nav-icon">⭐</span> Performance
       </a>
+      <a href="#" class="nav-item" onclick="showSection('it')">
+        <span class="nav-icon">💻</span> IT
+      </a>
+      <a href="#" class="nav-item" onclick="showSection('ga')">
+        <span class="nav-icon">🏗️</span> General Affairs
+      </a>
     </nav>
     <div class="sidebar-user">
       <div class="user-avatar">VM</div>
@@ -349,6 +355,196 @@
             <tr><td>Andi Setiawan</td><td>Engineering</td><td>⭐ 4.5 / 5</td><td>Nov 10, 2026</td><td><span class="badge badge-purple">Scheduled</span></td></tr>
             <tr><td>Rina Putri</td><td>Marketing</td><td>⭐ 4.2 / 5</td><td>Nov 11, 2026</td><td><span class="badge badge-purple">Scheduled</span></td></tr>
             <tr><td>Sari Wijaya</td><td>Operations</td><td>⭐ 4.8 / 5</td><td>Nov 12, 2026</td><td><span class="badge badge-blue">In Progress</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- IT Section -->
+    <section id="section-it" class="section">
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">💻</div>
+          <div class="stat-info">
+            <div class="stat-value">312</div>
+            <div class="stat-label">Total Assets</div>
+            <div class="stat-change positive">↑ 8 new this month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">🎫</div>
+          <div class="stat-info">
+            <div class="stat-value">23</div>
+            <div class="stat-label">Open Tickets</div>
+            <div class="stat-change negative">↑ 5 from last week</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-info">
+            <div class="stat-value">96.8%</div>
+            <div class="stat-label">System Uptime</div>
+            <div class="stat-change positive">↑ 0.3% vs last month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">🔐</div>
+          <div class="stat-info">
+            <div class="stat-value">248</div>
+            <div class="stat-label">Active Licenses</div>
+            <div class="stat-change neutral">→ All assigned</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IT Requests & Asset Inventory -->
+      <div class="mid-grid">
+        <div class="card">
+          <div class="card-header">
+            <h3>🎫 IT Support Tickets</h3>
+            <button class="btn btn-primary">+ New Ticket</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr><th>Ticket ID</th><th>Requester</th><th>Issue</th><th>Priority</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>#IT-1042</td><td>Andi Setiawan</td><td>Laptop screen flickering</td><td><span class="badge badge-red">High</span></td><td><span class="badge badge-orange">In Progress</span></td></tr>
+              <tr><td>#IT-1041</td><td>Rina Putri</td><td>VPN connection issue</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-orange">Pending</span></td></tr>
+              <tr><td>#IT-1040</td><td>Budi Hartono</td><td>New account setup</td><td><span class="badge badge-blue">Low</span></td><td><span class="badge badge-green">Resolved</span></td></tr>
+              <tr><td>#IT-1039</td><td>Sari Wijaya</td><td>Printer not responding</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-green">Resolved</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>🖥️ Asset Inventory</h3>
+            <button class="btn btn-primary">+ Add Asset</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr><th>Asset</th><th>Type</th><th>Assigned To</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>MacBook Pro 14"</td><td>Laptop</td><td>Andi Setiawan</td><td><span class="badge badge-green">Active</span></td></tr>
+              <tr><td>Dell Monitor 27"</td><td>Monitor</td><td>Rina Putri</td><td><span class="badge badge-green">Active</span></td></tr>
+              <tr><td>HP LaserJet Pro</td><td>Printer</td><td>3F — Marketing</td><td><span class="badge badge-orange">Maintenance</span></td></tr>
+              <tr><td>ThinkPad X1 Carbon</td><td>Laptop</td><td>Unassigned</td><td><span class="badge badge-blue">Available</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Software Licenses -->
+      <div class="card">
+        <div class="card-header">
+          <h3>🔑 Software Licenses</h3>
+          <a href="#" class="card-link">Manage all</a>
+        </div>
+        <table class="table">
+          <thead><tr><th>Software</th><th>License Type</th><th>Total Seats</th><th>Used</th><th>Expiry</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Microsoft 365</td><td>Enterprise E3</td><td>250</td><td>248</td><td>Mar 2027</td><td><span class="badge badge-green">Active</span></td></tr>
+            <tr><td>Slack</td><td>Business+</td><td>250</td><td>245</td><td>Jun 2027</td><td><span class="badge badge-green">Active</span></td></tr>
+            <tr><td>Adobe Creative Cloud</td><td>Teams</td><td>30</td><td>28</td><td>Jan 2027</td><td><span class="badge badge-green">Active</span></td></tr>
+            <tr><td>Zoom</td><td>Business</td><td>50</td><td>50</td><td>Dec 2026</td><td><span class="badge badge-orange">Renew Soon</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- GA (General Affairs) Section -->
+    <section id="section-ga" class="section">
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">🏢</div>
+          <div class="stat-info">
+            <div class="stat-value">5</div>
+            <div class="stat-label">Office Locations</div>
+            <div class="stat-change neutral">→ Jakarta, Surabaya, Bali, Medan, Bandung</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">🚗</div>
+          <div class="stat-info">
+            <div class="stat-value">Rp 42.5M</div>
+            <div class="stat-label">Transport Expenses (Oct)</div>
+            <div class="stat-change negative">↑ 8% vs last month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">📋</div>
+          <div class="stat-info">
+            <div class="stat-value">14</div>
+            <div class="stat-label">Pending Requests</div>
+            <div class="stat-change positive">↓ 3 from last week</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">🎂</div>
+          <div class="stat-info">
+            <div class="stat-value">7</div>
+            <div class="stat-label">Birthdays This Month</div>
+            <div class="stat-change neutral">→ Gifts & cakes scheduled</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transport & Facility Requests -->
+      <div class="mid-grid">
+        <div class="card">
+          <div class="card-header">
+            <h3>🚗 Transport Expenses</h3>
+            <button class="btn btn-primary">+ Submit Expense</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr><th>Employee</th><th>Service</th><th>Route</th><th>Fare</th><th>Date</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Andi Setiawan</td><td><span class="badge badge-green">Grab</span></td><td>Home → Office</td><td>Rp 45,000</td><td>Oct 28</td><td><span class="badge badge-green">Approved</span></td></tr>
+              <tr><td>Rina Putri</td><td><span class="badge badge-blue">Gojek</span></td><td>Office → Client</td><td>Rp 62,000</td><td>Oct 28</td><td><span class="badge badge-orange">Pending</span></td></tr>
+              <tr><td>Sari Wijaya</td><td><span class="badge badge-green">Grab</span></td><td>Office → Home</td><td>Rp 38,000</td><td>Oct 27</td><td><span class="badge badge-green">Approved</span></td></tr>
+              <tr><td>Budi Hartono</td><td><span class="badge badge-blue">Gojek</span></td><td>Home → Office</td><td>Rp 52,000</td><td>Oct 27</td><td><span class="badge badge-green">Approved</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>📋 Facility Requests</h3>
+            <button class="btn btn-primary">+ New Request</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr><th>Request</th><th>Category</th><th>Location</th><th>Priority</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>AC repair — 5th floor</td><td>Maintenance</td><td>Jakarta HQ</td><td><span class="badge badge-red">High</span></td><td><span class="badge badge-orange">In Progress</span></td></tr>
+              <tr><td>Meeting room booking system</td><td>Facility</td><td>All Offices</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-blue">Planned</span></td></tr>
+              <tr><td>Pantry restock — coffee</td><td>Supplies</td><td>Jakarta HQ</td><td><span class="badge badge-blue">Low</span></td><td><span class="badge badge-green">Done</span></td></tr>
+              <tr><td>Parking lot gate repair</td><td>Maintenance</td><td>Surabaya</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-orange">Pending</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Birthday Management -->
+      <div class="card">
+        <div class="card-header">
+          <h3>🎂 Birthday Management — October 2026</h3>
+          <a href="#" class="card-link">View all months</a>
+        </div>
+        <table class="table">
+          <thead><tr><th>Employee</th><th>Department</th><th>Birthday</th><th>Gift</th><th>Cake</th><th>Budget</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><div class="employee-cell"><div class="avatar">DK</div> Dian Kusuma</div></td><td>HR</td><td>Oct 5</td><td>Voucher</td><td>Chocolate</td><td>Rp 350,000</td><td><span class="badge badge-green">Delivered</span></td></tr>
+            <tr><td><div class="employee-cell"><div class="avatar">RP</div> Rina Putri</div></td><td>Marketing</td><td>Oct 15</td><td>Voucher</td><td>Red Velvet</td><td>Rp 350,000</td><td><span class="badge badge-green">Delivered</span></td></tr>
+            <tr><td><div class="employee-cell"><div class="avatar">FH</div> Fajar Hidayat</div></td><td>Engineering</td><td>Oct 22</td><td>Voucher</td><td>Tiramisu</td><td>Rp 350,000</td><td><span class="badge badge-green">Delivered</span></td></tr>
+            <tr><td><div class="employee-cell"><div class="avatar">NW</div> Nadia Wijaya</div></td><td>Finance</td><td>Oct 30</td><td>Voucher</td><td>Cheese Cake</td><td>Rp 350,000</td><td><span class="badge badge-orange">Scheduled</span></td></tr>
           </tbody>
         </table>
       </div>

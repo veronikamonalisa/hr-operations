@@ -1,11 +1,13 @@
-const sections = ['dashboard', 'employees', 'leave', 'payroll', 'recruitment', 'performance'];
+const sections = ['dashboard', 'employees', 'leave', 'payroll', 'recruitment', 'performance', 'it', 'ga'];
 const titles = {
   dashboard: 'Dashboard',
   employees: 'Employee Directory',
   leave: 'Leave Management',
   payroll: 'Payroll',
   recruitment: 'Recruitment',
-  performance: 'Performance Reviews'
+  performance: 'Performance Reviews',
+  it: 'IT',
+  ga: 'General Affairs'
 };
 
 function showSection(name) {
