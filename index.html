@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR Operations — FCN Group</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🏢</span>
+      <span class="logo-text">FCN Group</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" onclick="showSection('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a href="#" class="nav-item" onclick="showSection('employees')">
+        <span class="nav-icon">👥</span> Employees
+      </a>
+      <a href="#" class="nav-item" onclick="showSection('leave')">
+        <span class="nav-icon">🗓️</span> Leave Management
+      </a>
+      <a href="#" class="nav-item" onclick="showSection('payroll')">
+        <span class="nav-icon">💰</span> Payroll
+      </a>
+      <a href="#" class="nav-item" onclick="showSection('recruitment')">
+        <span class="nav-icon">🔍</span> Recruitment
+      </a>
+      <a href="#" class="nav-item" onclick="showSection('performance')">
+        <span class="nav-icon">⭐</span> Performance
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar">VM</div>
+      <div class="user-info">
+        <div class="user-name">Veronika M.</div>
+        <div class="user-role">HR Operations</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-title" id="page-title">Dashboard</div>
+      <div class="header-actions">
+        <button class="btn btn-outline">🔔 Notifications</button>
+        <button class="btn btn-primary">+ New Request</button>
+      </div>
+    </header>
+
+    <!-- Dashboard Section -->
+    <section id="section-dashboard" class="section active">
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">👥</div>
+          <div class="stat-info">
+            <div class="stat-value">248</div>
+            <div class="stat-label">Total Employees</div>
+            <div class="stat-change positive">↑ 4 this month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-info">
+            <div class="stat-value">94.2%</div>
+            <div class="stat-label">Attendance Rate</div>
+            <div class="stat-change positive">↑ 1.2% vs last month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">🗓️</div>
+          <div class="stat-info">
+            <div class="stat-value">18</div>
+            <div class="stat-label">Pending Leave Requests</div>
+            <div class="stat-change negative">↑ 3 new today</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">🔍</div>
+          <div class="stat-info">
+            <div class="stat-value">12</div>
+            <div class="stat-label">Open Positions</div>
+            <div class="stat-change neutral">→ Same as last month</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle Row -->
+      <div class="mid-grid">
+        <!-- Upcoming Events -->
+        <div class="card">
+          <div class="card-header">
+            <h3>📅 Upcoming Events</h3>
+            <a href="#" class="card-link">View all</a>
+          </div>
+          <div class="event-list">
+            <div class="event-item">
+              <div class="event-date">
+                <span class="date-day">30</span>
+                <span class="date-month">Oct</span>
+              </div>
+              <div class="event-info">
+                <div class="event-title">Q4 Performance Review Kickoff</div>
+                <div class="event-meta">All Departments · 09:00 AM</div>
+              </div>
+              <span class="badge badge-blue">Review</span>
+            </div>
+            <div class="event-item">
+              <div class="event-date">
+                <span class="date-day">01</span>
+                <span class="date-month">Nov</span>
+              </div>
+              <div class="event-info">
+                <div class="event-title">New Employee Onboarding</div>
+                <div class="event-meta">HR Room · 08:30 AM</div>
+              </div>
+              <span class="badge badge-green">Onboarding</span>
+            </div>
+            <div class="event-item">
+              <div class="event-date">
+                <span class="date-day">05</span>
+                <span class="date-month">Nov</span>
+              </div>
+              <div class="event-info">
+                <div class="event-title">Payroll Deadline</div>
+                <div class="event-meta">Finance & HR · All Day</div>
+              </div>
+              <span class="badge badge-orange">Payroll</span>
+            </div>
+            <div class="event-item">
+              <div class="event-date">
+                <span class="date-day">10</span>
+                <span class="date-month">Nov</span>
+              </div>
+              <div class="event-info">
+                <div class="event-title">Salary Review 2027 Planning</div>
+                <div class="event-meta">Leadership Team · 14:00 PM</div>
+              </div>
+              <span class="badge badge-purple">Planning</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-header">
+            <h3>⚡ Quick Actions</h3>
+          </div>
+          <div class="quick-actions">
+            <button class="action-btn" onclick="alert('Add Employee form — coming soon!')">
+              <span>➕</span>
+              <span>Add Employee</span>
+            </button>
+            <button class="action-btn" onclick="alert('Approve Leave — coming soon!')">
+              <span>✅</span>
+              <span>Approve Leave</span>
+            </button>
+            <button class="action-btn" onclick="alert('Run Payroll — coming soon!')">
+              <span>💰</span>
+              <span>Run Payroll</span>
+            </button>
+            <button class="action-btn" onclick="alert('Post Job — coming soon!')">
+              <span>📢</span>
+              <span>Post Job</span>
+            </button>
+            <button class="action-btn" onclick="alert('Generate Report — coming soon!')">
+              <span>📊</span>
+              <span>Reports</span>
+            </button>
+            <button class="action-btn" onclick="alert('Send Announcement — coming soon!')">
+              <span>📣</span>
+              <span>Announce</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-header">
+          <h3>🕐 Recent Activity</h3>
+          <a href="#" class="card-link">View all</a>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Action</th>
+              <th>Department</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="employee-cell"><div class="avatar">AS</div> Andi Setiawan</div></td>
+              <td>Leave Request — Annual</td>
+              <td>Engineering</td>
+              <td>Oct 29, 2026</td>
+              <td><span class="badge badge-orange">Pending</span></td>
+            </tr>
+            <tr>
+              <td><div class="employee-cell"><div class="avatar">RP</div> Rina Putri</div></td>
+              <td>Contract Renewal</td>
+              <td>Marketing</td>
+              <td>Oct 28, 2026</td>
+              <td><span class="badge badge-green">Approved</span></td>
+            </tr>
+            <tr>
+              <td><div class="employee-cell"><div class="avatar">BH</div> Budi Hartono</div></td>
+              <td>Onboarding Completed</td>
+              <td>Finance</td>
+              <td>Oct 27, 2026</td>
+              <td><span class="badge badge-blue">Done</span></td>
+            </tr>
+            <tr>
+              <td><div class="employee-cell"><div class="avatar">SW</div> Sari Wijaya</div></td>
+              <td>Performance Review</td>
+              <td>Operations</td>
+              <td>Oct 26, 2026</td>
+              <td><span class="badge badge-purple">Scheduled</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Employees Section -->
+    <section id="section-employees" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h3>👥 Employee Directory</h3>
+          <button class="btn btn-primary">+ Add Employee</button>
+        </div>
+        <div class="search-bar">
+          <input type="text" placeholder="🔍 Search employees..." class="search-input" />
+        </div>
+        <table class="table">
+          <thead>
+            <tr><th>Name</th><th>Position</th><th>Department</th><th>Status</th><th>Joined</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><div class="employee-cell"><div class="avatar">AS</div> Andi Setiawan</div></td><td>Senior Engineer</td><td>Engineering</td><td><span class="badge badge-green">Active</span></td><td>Jan 2024</td></tr>
+            <tr><td><div class="employee-cell"><div class="avatar">RP</div> Rina Putri</div></td><td>Marketing Manager</td><td>Marketing</td><td><span class="badge badge-green">Active</span></td><td>Mar 2023</td></tr>
+            <tr><td><div class="employee-cell"><div class="avatar">BH</div> Budi Hartono</div></td><td>Financial Analyst</td><td>Finance</td><td><span class="badge badge-blue">Probation</span></td><td>Oct 2026</td></tr>
+            <tr><td><div class="employee-cell"><div class="avatar">SW</div> Sari Wijaya</div></td><td>Operations Lead</td><td>Operations</td><td><span class="badge badge-green">Active</span></td><td>Jun 2022</td></tr>
+            <tr><td><div class="employee-cell"><div class="avatar">DK</div> Dian Kusuma</div></td><td>HR Specialist</td><td>HR</td><td><span class="badge badge-orange">On Leave</span></td><td>Aug 2021</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Leave Section -->
+    <section id="section-leave" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h3>🗓️ Leave Requests</h3>
+          <button class="btn btn-primary">+ New Leave</button>
+        </div>
+        <table class="table">
+          <thead>
+            <tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="employee-cell"><div class="avatar">AS</div> Andi Setiawan</div></td>
+              <td>Annual Leave</td><td>Nov 3</td><td>Nov 7</td><td>5</td>
+              <td><span class="badge badge-orange">Pending</span></td>
+              <td><button class="btn-sm btn-green" onclick="alert('Approved!')">Approve</button> <button class="btn-sm btn-red" onclick="alert('Rejected!')">Reject</button></td>
+            </tr>
+            <tr>
+              <td><div class="employee-cell"><div class="avatar">SW</div> Sari Wijaya</div></td>
+              <td>Sick Leave</td><td>Oct 30</td><td>Oct 31</td><td>2</td>
+              <td><span class="badge badge-green">Approved</span></td>
+              <td><button class="btn-sm btn-gray" disabled>Done</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Payroll Section -->
+    <section id="section-payroll" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h3>💰 Payroll — October 2026</h3>
+          <button class="btn btn-primary">Run Payroll</button>
+        </div>
+        <div class="stats-grid" style="margin-bottom:1.5rem">
+          <div class="stat-card"><div class="stat-icon green">💵</div><div class="stat-info"><div class="stat-value">Rp 4.2B</div><div class="stat-label">Total Payroll</div></div></div>
+          <div class="stat-card"><div class="stat-icon blue">👥</div><div class="stat-info"><div class="stat-value">248</div><div class="stat-label">Employees Paid</div></div></div>
+          <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-info"><div class="stat-value">Nov 5</div><div class="stat-label">Next Deadline</div></div></div>
+        </div>
+        <table class="table">
+          <thead><tr><th>Employee</th><th>Department</th><th>Base Salary</th><th>Allowances</th><th>Deductions</th><th>Net Pay</th></tr></thead>
+          <tbody>
+            <tr><td>Andi Setiawan</td><td>Engineering</td><td>Rp 18,000,000</td><td>Rp 2,500,000</td><td>Rp 1,800,000</td><td><strong>Rp 18,700,000</strong></td></tr>
+            <tr><td>Rina Putri</td><td>Marketing</td><td>Rp 15,000,000</td><td>Rp 2,000,000</td><td>Rp 1,500,000</td><td><strong>Rp 15,500,000</strong></td></tr>
+            <tr><td>Sari Wijaya</td><td>Operations</td><td>Rp 16,000,000</td><td>Rp 2,200,000</td><td>Rp 1,600,000</td><td><strong>Rp 16,600,000</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Recruitment Section -->
+    <section id="section-recruitment" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h3>🔍 Open Positions</h3>
+          <button class="btn btn-primary">+ Post Job</button>
+        </div>
+        <div class="job-list">
+          <div class="job-card">
+            <div class="job-info"><div class="job-title">Product Manager</div><div class="job-meta">Product · Jakarta · Full-time</div></div>
+            <div class="job-stats"><span class="badge badge-blue">24 Applicants</span></div>
+            <span class="badge badge-green">Active</span>
+          </div>
+          <div class="job-card">
+            <div class="job-info"><div class="job-title">Senior Backend Engineer</div><div class="job-meta">Engineering · Remote · Full-time</div></div>
+            <div class="job-stats"><span class="badge badge-blue">41 Applicants</span></div>
+            <span class="badge badge-green">Active</span>
+          </div>
+          <div class="job-card">
+            <div class="job-info"><div class="job-title">Marketing Specialist</div><div class="job-meta">Marketing · Jakarta · Full-time</div></div>
+            <div class="job-stats"><span class="badge badge-blue">17 Applicants</span></div>
+            <span class="badge badge-orange">Interviewing</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Performance Section -->
+    <section id="section-performance" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h3>⭐ Performance Reviews — Q4 2026</h3>
+          <button class="btn btn-primary">Start Review Cycle</button>
+        </div>
+        <table class="table">
+          <thead><tr><th>Employee</th><th>Department</th><th>Score</th><th>Review Date</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Andi Setiawan</td><td>Engineering</td><td>⭐ 4.5 / 5</td><td>Nov 10, 2026</td><td><span class="badge badge-purple">Scheduled</span></td></tr>
+            <tr><td>Rina Putri</td><td>Marketing</td><td>⭐ 4.2 / 5</td><td>Nov 11, 2026</td><td><span class="badge badge-purple">Scheduled</span></td></tr>
+            <tr><td>Sari Wijaya</td><td>Operations</td><td>⭐ 4.8 / 5</td><td>Nov 12, 2026</td><td><span class="badge badge-blue">In Progress</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
