@@ -1,556 +1,955 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HR Operations — FCN Group</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* ── Filter bar ── */
+    .filter-bar {
+      display:none; gap:1rem; align-items:center; flex-wrap:wrap;
+      background:#fff; padding:.85rem 2rem;
+      border-bottom:1px solid #e8ecf4; position:sticky; top:64px; z-index:9;
+    }
+    .filter-bar.visible { display:flex; }
+    .filter-bar label { font-size:.8rem; font-weight:600; color:#6b7280; }
+    .filter-select {
+      padding:.45rem .85rem; border:1.5px solid #e8ecf4; border-radius:8px;
+      font-size:.85rem; background:#fff; cursor:pointer; outline:none;
+      transition:border-color .2s; font-family:inherit;
+    }
+    .filter-select:focus { border-color:#4f46e5; }
+    .filter-group { display:flex; align-items:center; gap:.5rem; }
+    .reset-btn {
+      padding:.4rem .85rem; background:#f3f4f6; border:none; border-radius:8px;
+      font-size:.8rem; font-weight:600; cursor:pointer; color:#374151; transition:background .2s;
+    }
+    .reset-btn:hover { background:#e5e7eb; }
+
+    /* ── Stat cards (analytics) ── */
+    .stats-6 {
+      display:grid; grid-template-columns:repeat(6,1fr); gap:1rem; margin-bottom:1.5rem;
+    }
+    @media(max-width:1200px){ .stats-6{grid-template-columns:repeat(3,1fr);} }
+    @media(max-width:768px){ .stats-6{grid-template-columns:repeat(2,1fr);} }
+    .stat-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:.4rem; }
+    .stat-icon-sm { width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0; }
+    .stat-delta { font-size:.72rem;font-weight:600;padding:.15rem .45rem;border-radius:20px; }
+    .delta-up   { background:#d1fae5;color:#065f46; }
+    .delta-down { background:#fee2e2;color:#b91c1c; }
+    .delta-flat { background:#f3f4f6;color:#6b7280; }
+    .stat-num { font-size:1.6rem;font-weight:700;line-height:1; }
+    .stat-lbl { font-size:.75rem;color:#6b7280;margin-top:.2rem; }
+
+    /* ── Charts ── */
+    .charts-grid { display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem; }
+    @media(max-width:900px){ .charts-grid{grid-template-columns:1fr;} }
+    .chart-card { background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .chart-card h3 { font-size:.95rem;font-weight:600;margin-bottom:1rem; }
+    .chart-wrap { position:relative;height:230px; }
+    .chart-full { grid-column:1/-1; }
+    .legend-row { display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:.75rem; }
+    .legend-item { display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:#374151; }
+    .legend-dot { width:10px;height:10px;border-radius:50%; }
+
+    /* ── Colors ── */
+    .pos { color:#10b981;font-weight:600; }
+    .neg { color:#ef4444;font-weight:600; }
+    .payroll-cell { font-weight:600;color:#4f46e5; }
+    .monthly-table-wrap { overflow-x:auto; }
+
+    /* ── Data badge ── */
+    .live-badge {
+      font-size:.72rem;background:#dcfce7;color:#166534;padding:.2rem .55rem;
+      border-radius:20px;font-weight:600;
+    }
+    .section-title-row {
+      display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;
+    }
+    .section-title-row h2 { font-size:1.1rem;font-weight:700; }
+  </style>
 </head>
 <body>
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <span class="logo-icon">🏢</span>
-      <span class="logo-text">FCN Group</span>
-    </div>
-    <nav class="sidebar-nav">
-      <a href="#" class="nav-item active" onclick="showSection('dashboard')">
-        <span class="nav-icon">📊</span> Dashboard
-      </a>
-      <a href="#" class="nav-item" onclick="showSection('employees')">
-        <span class="nav-icon">👥</span> Employees
-      </a>
-      <a href="#" class="nav-item" onclick="showSection('leave')">
-        <span class="nav-icon">🗓️</span> Leave Management
-      </a>
-      <a href="#" class="nav-item" onclick="showSection('payroll')">
-        <span class="nav-icon">💰</span> Payroll
-      </a>
-      <a href="#" class="nav-item" onclick="showSection('recruitment')">
-        <span class="nav-icon">🔍</span> Recruitment
-      </a>
-      <a href="#" class="nav-item" onclick="showSection('performance')">
-        <span class="nav-icon">⭐</span> Performance
-      </a>
-      <a href="#" class="nav-item" onclick="showSection('it')">
-        <span class="nav-icon">💻</span> IT
-      </a>
-      <a href="#" class="nav-item" onclick="showSection('ga')">
-        <span class="nav-icon">🏗️</span> General Affairs
-      </a>
-    </nav>
-    <div class="sidebar-user">
-      <div class="user-avatar">VM</div>
-      <div class="user-info">
-        <div class="user-name">Veronika M.</div>
-        <div class="user-role">HR Operations</div>
-      </div>
-    </div>
-  </aside>
 
-  <!-- Main Content -->
-  <main class="main">
-    <!-- Header -->
-    <header class="header">
+<!-- ══ Sidebar ══════════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">🏢</span>
+    <span class="logo-text">FCN Group</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" onclick="showSection('dashboard',this)">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a href="#" class="nav-item" onclick="showSection('employees',this)">
+      <span class="nav-icon">👥</span> Employees
+    </a>
+    <a href="#" class="nav-item" onclick="showSection('payroll',this)">
+      <span class="nav-icon">💰</span> Payroll
+    </a>
+    <a href="#" class="nav-item" onclick="showSection('leave',this)">
+      <span class="nav-icon">🗓️</span> Leave
+    </a>
+    <a href="#" class="nav-item" onclick="showSection('recruitment',this)">
+      <span class="nav-icon">🔍</span> Recruitment
+    </a>
+    <a href="#" class="nav-item" onclick="showSection('performance',this)">
+      <span class="nav-icon">⭐</span> Performance
+    </a>
+    <a href="#" class="nav-item" onclick="showSection('it',this)">
+      <span class="nav-icon">💻</span> IT
+    </a>
+    <a href="#" class="nav-item" onclick="showSection('ga',this)">
+      <span class="nav-icon">🏗️</span> General Affairs
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar">VM</div>
+    <div class="user-info">
+      <div class="user-name">Veronika M.</div>
+      <div class="user-role">HR Operations</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ Main ══════════════════════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div style="display:flex;align-items:center;gap:.75rem">
       <div class="header-title" id="page-title">Dashboard</div>
-      <div class="header-actions">
-        <button class="btn btn-outline">🔔 Notifications</button>
-        <button class="btn btn-primary">+ New Request</button>
+      <span class="live-badge" id="data-badge">📡 Live · Lark Base</span>
+    </div>
+    <div class="header-actions">
+      <span style="font-size:.78rem;color:#9ca3af">Data per Sep 2026</span>
+      <button class="btn btn-primary" id="header-action-btn">+ New Request</button>
+    </div>
+  </header>
+
+  <!-- Filter bar (only for dashboard) -->
+  <div class="filter-bar" id="filter-bar">
+    <div class="filter-group">
+      <label>PT / Opco</label>
+      <select class="filter-select" id="pt-filter">
+        <option value="ALL">Semua PT</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Periode</label>
+      <select class="filter-select" id="month-from"></select>
+      <span style="color:#9ca3af">—</span>
+      <select class="filter-select" id="month-to"></select>
+    </div>
+    <button class="reset-btn" onclick="resetFilters()">↺ Reset</button>
+    <span id="filter-label" style="font-size:.78rem;color:#6b7280;margin-left:auto;"></span>
+  </div>
+
+  <!-- ══ DASHBOARD ════════════════════════════════════════════════════ -->
+  <section id="section-dashboard" class="section active" style="padding:1.75rem 2rem">
+
+    <!-- 6 Stat Cards -->
+    <div class="stats-6">
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon-sm blue">👥</div><span class="stat-delta delta-flat" id="d-delta-total">—</span></div>
+        <div class="stat-num" id="d-total">—</div>
+        <div class="stat-lbl">Total Karyawan Aktif</div>
       </div>
-    </header>
-
-    <!-- Dashboard Section -->
-    <section id="section-dashboard" class="section active">
-      <!-- Stats Cards -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon blue">👥</div>
-          <div class="stat-info">
-            <div class="stat-value">248</div>
-            <div class="stat-label">Total Employees</div>
-            <div class="stat-change positive">↑ 4 this month</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon green">✅</div>
-          <div class="stat-info">
-            <div class="stat-value">94.2%</div>
-            <div class="stat-label">Attendance Rate</div>
-            <div class="stat-change positive">↑ 1.2% vs last month</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon orange">🗓️</div>
-          <div class="stat-info">
-            <div class="stat-value">18</div>
-            <div class="stat-label">Pending Leave Requests</div>
-            <div class="stat-change negative">↑ 3 new today</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon purple">🔍</div>
-          <div class="stat-info">
-            <div class="stat-value">12</div>
-            <div class="stat-label">Open Positions</div>
-            <div class="stat-change neutral">→ Same as last month</div>
-          </div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon-sm green">🟢</div><span class="stat-delta delta-flat" id="d-delta-join">—</span></div>
+        <div class="stat-num" id="d-join">—</div>
+        <div class="stat-lbl">Karyawan Masuk</div>
       </div>
-
-      <!-- Middle Row -->
-      <div class="mid-grid">
-        <!-- Upcoming Events -->
-        <div class="card">
-          <div class="card-header">
-            <h3>📅 Upcoming Events</h3>
-            <a href="#" class="card-link">View all</a>
-          </div>
-          <div class="event-list">
-            <div class="event-item">
-              <div class="event-date">
-                <span class="date-day">30</span>
-                <span class="date-month">Oct</span>
-              </div>
-              <div class="event-info">
-                <div class="event-title">Q4 Performance Review Kickoff</div>
-                <div class="event-meta">All Departments · 09:00 AM</div>
-              </div>
-              <span class="badge badge-blue">Review</span>
-            </div>
-            <div class="event-item">
-              <div class="event-date">
-                <span class="date-day">01</span>
-                <span class="date-month">Nov</span>
-              </div>
-              <div class="event-info">
-                <div class="event-title">New Employee Onboarding</div>
-                <div class="event-meta">HR Room · 08:30 AM</div>
-              </div>
-              <span class="badge badge-green">Onboarding</span>
-            </div>
-            <div class="event-item">
-              <div class="event-date">
-                <span class="date-day">05</span>
-                <span class="date-month">Nov</span>
-              </div>
-              <div class="event-info">
-                <div class="event-title">Payroll Deadline</div>
-                <div class="event-meta">Finance & HR · All Day</div>
-              </div>
-              <span class="badge badge-orange">Payroll</span>
-            </div>
-            <div class="event-item">
-              <div class="event-date">
-                <span class="date-day">10</span>
-                <span class="date-month">Nov</span>
-              </div>
-              <div class="event-info">
-                <div class="event-title">Salary Review 2027 Planning</div>
-                <div class="event-meta">Leadership Team · 14:00 PM</div>
-              </div>
-              <span class="badge badge-purple">Planning</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card">
-          <div class="card-header">
-            <h3>⚡ Quick Actions</h3>
-          </div>
-          <div class="quick-actions">
-            <button class="action-btn" onclick="alert('Add Employee form — coming soon!')">
-              <span>➕</span>
-              <span>Add Employee</span>
-            </button>
-            <button class="action-btn" onclick="alert('Approve Leave — coming soon!')">
-              <span>✅</span>
-              <span>Approve Leave</span>
-            </button>
-            <button class="action-btn" onclick="alert('Run Payroll — coming soon!')">
-              <span>💰</span>
-              <span>Run Payroll</span>
-            </button>
-            <button class="action-btn" onclick="alert('Post Job — coming soon!')">
-              <span>📢</span>
-              <span>Post Job</span>
-            </button>
-            <button class="action-btn" onclick="alert('Generate Report — coming soon!')">
-              <span>📊</span>
-              <span>Reports</span>
-            </button>
-            <button class="action-btn" onclick="alert('Send Announcement — coming soon!')">
-              <span>📣</span>
-              <span>Announce</span>
-            </button>
-          </div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon-sm" style="background:#fee2e2">🔴</div><span class="stat-delta delta-flat" id="d-delta-resign">—</span></div>
+        <div class="stat-num" id="d-resign">—</div>
+        <div class="stat-lbl">Karyawan Keluar</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon-sm orange">⏳</div><span class="stat-delta delta-flat" id="d-delta-prob">—</span></div>
+        <div class="stat-num" id="d-prob">—</div>
+        <div class="stat-lbl">Probation</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon-sm purple">📋</div><span class="stat-delta delta-flat" id="d-delta-cont">—</span></div>
+        <div class="stat-num" id="d-cont">—</div>
+        <div class="stat-lbl">Kontrak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon-sm green">💰</div><span class="stat-delta delta-flat" id="d-delta-pay">—</span></div>
+        <div class="stat-num" id="d-pay" style="font-size:1.2rem">—</div>
+        <div class="stat-lbl">Total Payroll (Periode)</div>
+      </div>
+    </div>
 
-      <!-- Recent Activity -->
-      <div class="card">
-        <div class="card-header">
-          <h3>🕐 Recent Activity</h3>
-          <a href="#" class="card-link">View all</a>
+    <!-- Charts row -->
+    <div class="charts-grid">
+      <div class="chart-card chart-full">
+        <h3>💰 Payroll Movement — Total Take Home Pay</h3>
+        <div class="chart-wrap" style="height:210px"><canvas id="chartPayroll"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>👥 Karyawan Masuk vs Keluar</h3>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Masuk</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Keluar</div>
         </div>
+        <div class="chart-wrap"><canvas id="chartHires"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>📋 Status Karyawan</h3>
+        <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
+      </div>
+    </div>
+
+    <!-- PT Breakdown -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-header"><h3>🏢 Breakdown per PT / Opco</h3></div>
+      <div class="monthly-table-wrap">
         <table class="table">
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Action</th>
-              <th>Department</th>
-              <th>Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>PT / Opco</th>
+            <th style="text-align:right">Total Aktif</th>
+            <th style="text-align:right">Permanent</th>
+            <th style="text-align:right">Kontrak</th>
+            <th style="text-align:right">Probation</th>
+            <th style="text-align:right">Intern</th>
+            <th style="text-align:right">Masuk (Periode)</th>
+            <th style="text-align:right">Keluar (Periode)</th>
+          </tr></thead>
+          <tbody id="pt-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Monthly table -->
+    <div class="card">
+      <div class="card-header"><h3>📅 Data Bulanan</h3></div>
+      <div class="monthly-table-wrap">
+        <table class="table">
+          <thead><tr>
+            <th>Bulan</th><th style="text-align:right">Masuk</th>
+            <th style="text-align:right">Keluar</th><th style="text-align:right">Net</th>
+            <th style="text-align:right">Total Payroll</th><th style="text-align:right">vs Bulan Lalu</th>
+          </tr></thead>
+          <tbody id="monthly-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ EMPLOYEES ═══════════════════════════════════════════════════ -->
+  <section id="section-employees" class="section" style="padding:1.75rem 2rem">
+    <div class="section-title-row">
+      <h2>👥 Employee Directory</h2>
+      <span class="live-badge">📡 Lark Base · 641 ex + 235 aktif</span>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="stats-grid" style="margin-bottom:1.5rem">
+      <div class="stat-card">
+        <div class="stat-icon blue">👥</div>
+        <div class="stat-info">
+          <div class="stat-value">235</div>
+          <div class="stat-label">Total Aktif</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info">
+          <div class="stat-value">387</div>
+          <div class="stat-label">Permanent</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">⏳</div>
+        <div class="stat-info">
+          <div class="stat-value">123</div>
+          <div class="stat-label">Probation</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">📋</div>
+        <div class="stat-info">
+          <div class="stat-value">38</div>
+          <div class="stat-label">Kontrak</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PT Breakdown table -->
+    <div class="card">
+      <div class="card-header"><h3>🏢 Headcount per PT / Opco</h3></div>
+      <div class="monthly-table-wrap">
+        <table class="table">
+          <thead><tr>
+            <th>PT / Opco</th>
+            <th style="text-align:right">Total Aktif</th>
+            <th style="text-align:right">Permanent</th>
+            <th style="text-align:right">Kontrak</th>
+            <th style="text-align:right">Probation</th>
+            <th style="text-align:right">Internship</th>
+          </tr></thead>
           <tbody>
-            <tr>
-              <td><div class="employee-cell"><div class="avatar">AS</div> Andi Setiawan</div></td>
-              <td>Leave Request — Annual</td>
-              <td>Engineering</td>
-              <td>Oct 29, 2026</td>
-              <td><span class="badge badge-orange">Pending</span></td>
-            </tr>
-            <tr>
-              <td><div class="employee-cell"><div class="avatar">RP</div> Rina Putri</div></td>
-              <td>Contract Renewal</td>
-              <td>Marketing</td>
-              <td>Oct 28, 2026</td>
-              <td><span class="badge badge-green">Approved</span></td>
-            </tr>
-            <tr>
-              <td><div class="employee-cell"><div class="avatar">BH</div> Budi Hartono</div></td>
-              <td>Onboarding Completed</td>
-              <td>Finance</td>
-              <td>Oct 27, 2026</td>
-              <td><span class="badge badge-blue">Done</span></td>
-            </tr>
-            <tr>
-              <td><div class="employee-cell"><div class="avatar">SW</div> Sari Wijaya</div></td>
-              <td>Performance Review</td>
-              <td>Operations</td>
-              <td>Oct 26, 2026</td>
-              <td><span class="badge badge-purple">Scheduled</span></td>
-            </tr>
+            
+      <tr>
+        <td>
+          <div style="font-weight:600">Jingga Kreasi Multiguna</div>
+          <div style="font-size:.72rem;color:#9ca3af">PT Jingga Kreasi Multiguna</div>
+        </td>
+        <td style="text-align:right"><strong>116</strong></td>
+        <td style="text-align:right">82</td>
+        <td style="text-align:right">9</td>
+        <td style="text-align:right">15</td>
+        <td style="text-align:right">10</td>
+      </tr>
+
+      <tr>
+        <td>
+          <div style="font-weight:600">Langit Bimasakti Multiguna</div>
+          <div style="font-size:.72rem;color:#9ca3af">PT Langit Bimasakti Multiguna</div>
+        </td>
+        <td style="text-align:right"><strong>23</strong></td>
+        <td style="text-align:right">20</td>
+        <td style="text-align:right">0</td>
+        <td style="text-align:right">2</td>
+        <td style="text-align:right">1</td>
+      </tr>
+
+      <tr>
+        <td>
+          <div style="font-weight:600">Menuju Bulan Multiguna</div>
+          <div style="font-size:.72rem;color:#9ca3af">PT Menuju Bulan Multiguna</div>
+        </td>
+        <td style="text-align:right"><strong>11</strong></td>
+        <td style="text-align:right">7</td>
+        <td style="text-align:right">0</td>
+        <td style="text-align:right">4</td>
+        <td style="text-align:right">0</td>
+      </tr>
+
+      <tr>
+        <td>
+          <div style="font-weight:600">Orca Performa Multiguna</div>
+          <div style="font-size:.72rem;color:#9ca3af">PT Orca Performa Multiguna</div>
+        </td>
+        <td style="text-align:right"><strong>13</strong></td>
+        <td style="text-align:right">6</td>
+        <td style="text-align:right">0</td>
+        <td style="text-align:right">7</td>
+        <td style="text-align:right">0</td>
+      </tr>
+
+      <tr>
+        <td>
+          <div style="font-weight:600">Sisi Karya Multiguna</div>
+          <div style="font-size:.72rem;color:#9ca3af">PT Sisi Karya Multiguna</div>
+        </td>
+        <td style="text-align:right"><strong>22</strong></td>
+        <td style="text-align:right">18</td>
+        <td style="text-align:right">2</td>
+        <td style="text-align:right">2</td>
+        <td style="text-align:right">0</td>
+      </tr>
+
+      <tr>
+        <td>
+          <div style="font-weight:600">Pusat</div>
+          <div style="font-size:.72rem;color:#9ca3af">Pusat</div>
+        </td>
+        <td style="text-align:right"><strong>48</strong></td>
+        <td style="text-align:right">38</td>
+        <td style="text-align:right">7</td>
+        <td style="text-align:right">3</td>
+        <td style="text-align:right">0</td>
+      </tr>
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Employees Section -->
-    <section id="section-employees" class="section">
-      <div class="card">
-        <div class="card-header">
-          <h3>👥 Employee Directory</h3>
-          <button class="btn btn-primary">+ Add Employee</button>
+  <!-- ══ PAYROLL ════════════════════════════════════════════════════ -->
+  <section id="section-payroll" class="section" style="padding:1.75rem 2rem">
+    <div class="section-title-row">
+      <h2>💰 Payroll</h2>
+      <span class="live-badge">📡 Lark Base · 9,355 records</span>
+    </div>
+
+    <!-- Summary -->
+    <div class="stats-grid" style="margin-bottom:1.5rem">
+      <div class="stat-card">
+        <div class="stat-icon green">💵</div>
+        <div class="stat-info">
+          <div class="stat-value" style="font-size:1.2rem">Rp 4.43B</div>
+          <div class="stat-label">Total Payroll Sep 2026</div>
+          <div class="stat-change negative">↓ Rp 125.1M (2.7%) vs Aug 2026</div>
         </div>
-        <div class="search-bar">
-          <input type="text" placeholder="🔍 Search employees..." class="search-input" />
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">👥</div>
+        <div class="stat-info">
+          <div class="stat-value">235</div>
+          <div class="stat-label">Karyawan Aktif</div>
         </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">📅</div>
+        <div class="stat-info">
+          <div class="stat-value">22</div>
+          <div class="stat-label">Bulan Data Tersedia</div>
+          <div class="stat-change neutral">→ Des 2024 — Sep 2026</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">📊</div>
+        <div class="stat-info">
+          <div class="stat-value">9,355</div>
+          <div class="stat-label">Total Payslip Records</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly payroll table -->
+    <div class="card">
+      <div class="card-header"><h3>📅 Payroll per Bulan (12 Bulan Terakhir)</h3></div>
+      <div class="monthly-table-wrap">
         <table class="table">
-          <thead>
-            <tr><th>Name</th><th>Position</th><th>Department</th><th>Status</th><th>Joined</th></tr>
-          </thead>
+          <thead><tr>
+            <th>Bulan</th>
+            <th style="text-align:right">Karyawan Masuk</th>
+            <th style="text-align:right">Karyawan Keluar</th>
+            <th style="text-align:right">Total Payroll</th>
+            <th style="text-align:right">vs Bulan Lalu</th>
+          </tr></thead>
           <tbody>
-            <tr><td><div class="employee-cell"><div class="avatar">AS</div> Andi Setiawan</div></td><td>Senior Engineer</td><td>Engineering</td><td><span class="badge badge-green">Active</span></td><td>Jan 2024</td></tr>
-            <tr><td><div class="employee-cell"><div class="avatar">RP</div> Rina Putri</div></td><td>Marketing Manager</td><td>Marketing</td><td><span class="badge badge-green">Active</span></td><td>Mar 2023</td></tr>
-            <tr><td><div class="employee-cell"><div class="avatar">BH</div> Budi Hartono</div></td><td>Financial Analyst</td><td>Finance</td><td><span class="badge badge-blue">Probation</span></td><td>Oct 2026</td></tr>
-            <tr><td><div class="employee-cell"><div class="avatar">SW</div> Sari Wijaya</div></td><td>Operations Lead</td><td>Operations</td><td><span class="badge badge-green">Active</span></td><td>Jun 2022</td></tr>
-            <tr><td><div class="employee-cell"><div class="avatar">DK</div> Dian Kusuma</div></td><td>HR Specialist</td><td>HR</td><td><span class="badge badge-orange">On Leave</span></td><td>Aug 2021</td></tr>
+            
+      <tr>
+        <td><strong>Sep 2026</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 4.43B</td>
+        <td style="text-align:right"><span class="neg">↓ Rp 125.1M (2.7%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>Aug 2026</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 4.55B</td>
+        <td style="text-align:right"><span class="neg">↓ Rp 10.0M (0.2%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>Jul 2026</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 4.56B</td>
+        <td style="text-align:right"><span class="pos">↑ Rp 26.5M (0.6%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>Jun 2026</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 4.53B</td>
+        <td style="text-align:right"><span class="pos">↑ Rp 1.62B (55.4%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>May 2026</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 2.92B</td>
+        <td style="text-align:right"><span class="neg">↓ Rp 100.6M (3.3%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>Apr 2026</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 3.02B</td>
+        <td style="text-align:right"><span class="neg">↓ Rp 299.6M (9.0%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>Mar 2026</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 3.32B</td>
+        <td style="text-align:right"><span class="pos">↑ Rp 352.8M (11.9%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>Feb 2026</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 2.96B</td>
+        <td style="text-align:right"><span class="neg">↓ Rp 3.81B (56.2%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>Jan 2026</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 6.78B</td>
+        <td style="text-align:right"><span class="pos">↑ Rp 383.1M (6.0%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>Dec 2025</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 6.39B</td>
+        <td style="text-align:right"><span class="neg">↓ Rp 38.9M (0.6%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>Nov 2025</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 6.43B</td>
+        <td style="text-align:right"><span class="neg">↓ Rp 163.1M (2.5%)</span></td>
+      </tr>
+
+      <tr>
+        <td><strong>Oct 2025</strong></td>
+        <td style="text-align:right" class="pos">0</td>
+        <td style="text-align:right" class="neg">0</td>
+        <td style="text-align:right">Rp 6.59B</td>
+        <td style="text-align:right">—</td>
+      </tr>
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Leave Section -->
-    <section id="section-leave" class="section">
-      <div class="card">
-        <div class="card-header">
-          <h3>🗓️ Leave Requests</h3>
-          <button class="btn btn-primary">+ New Leave</button>
+  <!-- ══ LEAVE ══════════════════════════════════════════════════════ -->
+  <section id="section-leave" class="section" style="padding:1.75rem 2rem">
+    <div class="section-title-row">
+      <h2>🗓️ Leave Management</h2>
+    </div>
+    <div class="card">
+      <div style="text-align:center;padding:3rem 2rem;color:#9ca3af">
+        <div style="font-size:3rem;margin-bottom:1rem">🗓️</div>
+        <div style="font-size:1rem;font-weight:600;color:#374151;margin-bottom:.5rem">Leave data belum terhubung ke Lark Base</div>
+        <div style="font-size:.85rem">Hubungkan modul Leave Management untuk melihat data real-time di sini.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ RECRUITMENT ════════════════════════════════════════════════ -->
+  <section id="section-recruitment" class="section" style="padding:1.75rem 2rem">
+    <div class="section-title-row">
+      <h2>🔍 Recruitment</h2>
+    </div>
+
+    <!-- Hiring stats from real data -->
+    <div class="stats-grid" style="margin-bottom:1.5rem">
+      <div class="stat-card">
+        <div class="stat-icon blue">🟢</div>
+        <div class="stat-info">
+          <div class="stat-value">0</div>
+          <div class="stat-label">Hired Sep 2026</div>
         </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">📊</div>
+        <div class="stat-info">
+          <div class="stat-value">—</div>
+          <div class="stat-label">Offering Keluar</div>
+          <div class="stat-change neutral">→ Connect Recruitment Base</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">🔍</div>
+        <div class="stat-info">
+          <div class="stat-value">—</div>
+          <div class="stat-label">Open Positions</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">📋</div>
+        <div class="stat-info">
+          <div class="stat-value">—</div>
+          <div class="stat-label">Active Candidates</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly hiring table from real data -->
+    <div class="card">
+      <div class="card-header">
+        <h3>📅 Hiring per Bulan (dari Employee DB)</h3>
+        <span class="live-badge">📡 Lark Base</span>
+      </div>
+      <div class="monthly-table-wrap">
         <table class="table">
-          <thead>
-            <tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Action</th></tr>
-          </thead>
+          <thead><tr>
+            <th>Bulan</th>
+            <th style="text-align:right">Karyawan Masuk</th>
+            <th style="text-align:right">Karyawan Keluar</th>
+            <th style="text-align:right">Net</th>
+          </tr></thead>
+          <tbody id="recruit-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <section id="section-performance" class="section" style="padding:1.75rem 2rem">
+    <div class="section-title-row"><h2>⭐ Performance Reviews</h2></div>
+    <div class="card">
+      <div style="text-align:center;padding:3rem 2rem;color:#9ca3af">
+        <div style="font-size:3rem;margin-bottom:1rem">⭐</div>
+        <div style="font-size:1rem;font-weight:600;color:#374151;margin-bottom:.5rem">Performance data belum terhubung ke Lark Base</div>
+        <div style="font-size:.85rem">Hubungkan modul Performance Management untuk melihat data real-time di sini.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ IT (by Tyas) ═══════════════════════════════════════════════ -->
+  <section id="section-it" class="section" style="padding:1.75rem 2rem">
+    <div class="section-title-row"><h2>💻 IT</h2></div>
+    <div class="stats-grid" style="margin-bottom:1.5rem">
+      <div class="stat-card">
+        <div class="stat-icon blue">💻</div>
+        <div class="stat-info"><div class="stat-value">312</div><div class="stat-label">Total Assets</div><div class="stat-change positive">↑ 8 new this month</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">🎫</div>
+        <div class="stat-info"><div class="stat-value">23</div><div class="stat-label">Open Tickets</div><div class="stat-change negative">↑ 5 from last week</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info"><div class="stat-value">96.8%</div><div class="stat-label">System Uptime</div><div class="stat-change positive">↑ 0.3% vs last month</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">🔐</div>
+        <div class="stat-info"><div class="stat-value">248</div><div class="stat-label">Active Licenses</div><div class="stat-change neutral">→ All assigned</div></div>
+      </div>
+    </div>
+    <div class="mid-grid">
+      <div class="card">
+        <div class="card-header"><h3>🎫 IT Support Tickets</h3><button class="btn btn-primary">+ New Ticket</button></div>
+        <table class="table">
+          <thead><tr><th>Ticket ID</th><th>Requester</th><th>Issue</th><th>Priority</th><th>Status</th></tr></thead>
           <tbody>
-            <tr>
-              <td><div class="employee-cell"><div class="avatar">AS</div> Andi Setiawan</div></td>
-              <td>Annual Leave</td><td>Nov 3</td><td>Nov 7</td><td>5</td>
-              <td><span class="badge badge-orange">Pending</span></td>
-              <td><button class="btn-sm btn-green" onclick="alert('Approved!')">Approve</button> <button class="btn-sm btn-red" onclick="alert('Rejected!')">Reject</button></td>
-            </tr>
-            <tr>
-              <td><div class="employee-cell"><div class="avatar">SW</div> Sari Wijaya</div></td>
-              <td>Sick Leave</td><td>Oct 30</td><td>Oct 31</td><td>2</td>
-              <td><span class="badge badge-green">Approved</span></td>
-              <td><button class="btn-sm btn-gray" disabled>Done</button></td>
-            </tr>
+            <tr><td>#IT-1042</td><td>Engineering Team</td><td>Laptop screen flickering</td><td><span class="badge badge-red">High</span></td><td><span class="badge badge-orange">In Progress</span></td></tr>
+            <tr><td>#IT-1041</td><td>Marketing Team</td><td>VPN connection issue</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-orange">Pending</span></td></tr>
+            <tr><td>#IT-1040</td><td>Finance Team</td><td>New account setup</td><td><span class="badge badge-blue">Low</span></td><td><span class="badge badge-green">Resolved</span></td></tr>
+            <tr><td>#IT-1039</td><td>Operations Team</td><td>Printer not responding</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-green">Resolved</span></td></tr>
           </tbody>
         </table>
       </div>
-    </section>
-
-    <!-- Payroll Section -->
-    <section id="section-payroll" class="section">
       <div class="card">
-        <div class="card-header">
-          <h3>💰 Payroll — October 2026</h3>
-          <button class="btn btn-primary">Run Payroll</button>
-        </div>
-        <div class="stats-grid" style="margin-bottom:1.5rem">
-          <div class="stat-card"><div class="stat-icon green">💵</div><div class="stat-info"><div class="stat-value">Rp 4.2B</div><div class="stat-label">Total Payroll</div></div></div>
-          <div class="stat-card"><div class="stat-icon blue">👥</div><div class="stat-info"><div class="stat-value">248</div><div class="stat-label">Employees Paid</div></div></div>
-          <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-info"><div class="stat-value">Nov 5</div><div class="stat-label">Next Deadline</div></div></div>
-        </div>
+        <div class="card-header"><h3>🖥️ Asset Inventory</h3><button class="btn btn-primary">+ Add Asset</button></div>
         <table class="table">
-          <thead><tr><th>Employee</th><th>Department</th><th>Base Salary</th><th>Allowances</th><th>Deductions</th><th>Net Pay</th></tr></thead>
+          <thead><tr><th>Asset</th><th>Type</th><th>Assigned To</th><th>Status</th></tr></thead>
           <tbody>
-            <tr><td>Andi Setiawan</td><td>Engineering</td><td>Rp 18,000,000</td><td>Rp 2,500,000</td><td>Rp 1,800,000</td><td><strong>Rp 18,700,000</strong></td></tr>
-            <tr><td>Rina Putri</td><td>Marketing</td><td>Rp 15,000,000</td><td>Rp 2,000,000</td><td>Rp 1,500,000</td><td><strong>Rp 15,500,000</strong></td></tr>
-            <tr><td>Sari Wijaya</td><td>Operations</td><td>Rp 16,000,000</td><td>Rp 2,200,000</td><td>Rp 1,600,000</td><td><strong>Rp 16,600,000</strong></td></tr>
+            <tr><td>MacBook Pro 14"</td><td>Laptop</td><td>Engineering</td><td><span class="badge badge-green">Active</span></td></tr>
+            <tr><td>Dell Monitor 27"</td><td>Monitor</td><td>Marketing</td><td><span class="badge badge-green">Active</span></td></tr>
+            <tr><td>HP LaserJet Pro</td><td>Printer</td><td>3F — Marketing</td><td><span class="badge badge-orange">Maintenance</span></td></tr>
+            <tr><td>ThinkPad X1 Carbon</td><td>Laptop</td><td>Unassigned</td><td><span class="badge badge-blue">Available</span></td></tr>
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>🔑 Software Licenses</h3><a href="#" class="card-link">Manage all</a></div>
+      <table class="table">
+        <thead><tr><th>Software</th><th>License Type</th><th>Total Seats</th><th>Used</th><th>Expiry</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Microsoft 365</td><td>Enterprise E3</td><td>250</td><td>248</td><td>Mar 2027</td><td><span class="badge badge-green">Active</span></td></tr>
+          <tr><td>Slack</td><td>Business+</td><td>250</td><td>245</td><td>Jun 2027</td><td><span class="badge badge-green">Active</span></td></tr>
+          <tr><td>Adobe Creative Cloud</td><td>Teams</td><td>30</td><td>28</td><td>Jan 2027</td><td><span class="badge badge-green">Active</span></td></tr>
+          <tr><td>Zoom</td><td>Business</td><td>50</td><td>50</td><td>Dec 2026</td><td><span class="badge badge-orange">Renew Soon</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
-    <!-- Recruitment Section -->
-    <section id="section-recruitment" class="section">
-      <div class="card">
-        <div class="card-header">
-          <h3>🔍 Open Positions</h3>
-          <button class="btn btn-primary">+ Post Job</button>
-        </div>
-        <div class="job-list">
-          <div class="job-card">
-            <div class="job-info"><div class="job-title">Product Manager</div><div class="job-meta">Product · Jakarta · Full-time</div></div>
-            <div class="job-stats"><span class="badge badge-blue">24 Applicants</span></div>
-            <span class="badge badge-green">Active</span>
-          </div>
-          <div class="job-card">
-            <div class="job-info"><div class="job-title">Senior Backend Engineer</div><div class="job-meta">Engineering · Remote · Full-time</div></div>
-            <div class="job-stats"><span class="badge badge-blue">41 Applicants</span></div>
-            <span class="badge badge-green">Active</span>
-          </div>
-          <div class="job-card">
-            <div class="job-info"><div class="job-title">Marketing Specialist</div><div class="job-meta">Marketing · Jakarta · Full-time</div></div>
-            <div class="job-stats"><span class="badge badge-blue">17 Applicants</span></div>
-            <span class="badge badge-orange">Interviewing</span>
-          </div>
-        </div>
+  <!-- ══ GA (by Tyas) ══════════════════════════════════════════════ -->
+  <section id="section-ga" class="section" style="padding:1.75rem 2rem">
+    <div class="section-title-row"><h2>🏗️ General Affairs</h2></div>
+    <div class="stats-grid" style="margin-bottom:1.5rem">
+      <div class="stat-card">
+        <div class="stat-icon blue">🏢</div>
+        <div class="stat-info"><div class="stat-value">5</div><div class="stat-label">Office Locations</div><div class="stat-change neutral">→ Jakarta, Surabaya, Bali, Medan, Bandung</div></div>
       </div>
-    </section>
-
-    <!-- Performance Section -->
-    <section id="section-performance" class="section">
+      <div class="stat-card">
+        <div class="stat-icon green">🚗</div>
+        <div class="stat-info"><div class="stat-value">Rp 42.5M</div><div class="stat-label">Transport Expenses (Oct)</div><div class="stat-change negative">↑ 8% vs last month</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">📋</div>
+        <div class="stat-info"><div class="stat-value">14</div><div class="stat-label">Pending Requests</div><div class="stat-change positive">↓ 3 from last week</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">🎂</div>
+        <div class="stat-info"><div class="stat-value">7</div><div class="stat-label">Birthdays This Month</div><div class="stat-change neutral">→ Oct celebrations</div></div>
+      </div>
+    </div>
+    <div class="mid-grid">
       <div class="card">
-        <div class="card-header">
-          <h3>⭐ Performance Reviews — Q4 2026</h3>
-          <button class="btn btn-primary">Start Review Cycle</button>
-        </div>
+        <div class="card-header"><h3>🚗 Transport Requests</h3><button class="btn btn-primary">+ New Request</button></div>
         <table class="table">
-          <thead><tr><th>Employee</th><th>Department</th><th>Score</th><th>Review Date</th><th>Status</th></tr></thead>
+          <thead><tr><th>Date</th><th>Dept</th><th>Destination</th><th>Amount</th><th>Status</th></tr></thead>
           <tbody>
-            <tr><td>Andi Setiawan</td><td>Engineering</td><td>⭐ 4.5 / 5</td><td>Nov 10, 2026</td><td><span class="badge badge-purple">Scheduled</span></td></tr>
-            <tr><td>Rina Putri</td><td>Marketing</td><td>⭐ 4.2 / 5</td><td>Nov 11, 2026</td><td><span class="badge badge-purple">Scheduled</span></td></tr>
-            <tr><td>Sari Wijaya</td><td>Operations</td><td>⭐ 4.8 / 5</td><td>Nov 12, 2026</td><td><span class="badge badge-blue">In Progress</span></td></tr>
+            <tr><td>Oct 29</td><td>Sales</td><td>Client Meeting — Sudirman</td><td>Rp 250,000</td><td><span class="badge badge-orange">Pending</span></td></tr>
+            <tr><td>Oct 28</td><td>HR</td><td>Manpower Office</td><td>Rp 180,000</td><td><span class="badge badge-green">Approved</span></td></tr>
+            <tr><td>Oct 27</td><td>Finance</td><td>Tax Office — Gambir</td><td>Rp 320,000</td><td><span class="badge badge-green">Approved</span></td></tr>
           </tbody>
         </table>
       </div>
-    </section>
-
-    <!-- IT Section -->
-    <section id="section-it" class="section">
-      <!-- Stats Cards -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon blue">💻</div>
-          <div class="stat-info">
-            <div class="stat-value">312</div>
-            <div class="stat-label">Total Assets</div>
-            <div class="stat-change positive">↑ 8 new this month</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon orange">🎫</div>
-          <div class="stat-info">
-            <div class="stat-value">23</div>
-            <div class="stat-label">Open Tickets</div>
-            <div class="stat-change negative">↑ 5 from last week</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon green">✅</div>
-          <div class="stat-info">
-            <div class="stat-value">96.8%</div>
-            <div class="stat-label">System Uptime</div>
-            <div class="stat-change positive">↑ 0.3% vs last month</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon purple">🔐</div>
-          <div class="stat-info">
-            <div class="stat-value">248</div>
-            <div class="stat-label">Active Licenses</div>
-            <div class="stat-change neutral">→ All assigned</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- IT Requests & Asset Inventory -->
-      <div class="mid-grid">
-        <div class="card">
-          <div class="card-header">
-            <h3>🎫 IT Support Tickets</h3>
-            <button class="btn btn-primary">+ New Ticket</button>
-          </div>
-          <table class="table">
-            <thead>
-              <tr><th>Ticket ID</th><th>Requester</th><th>Issue</th><th>Priority</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>#IT-1042</td><td>Andi Setiawan</td><td>Laptop screen flickering</td><td><span class="badge badge-red">High</span></td><td><span class="badge badge-orange">In Progress</span></td></tr>
-              <tr><td>#IT-1041</td><td>Rina Putri</td><td>VPN connection issue</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-orange">Pending</span></td></tr>
-              <tr><td>#IT-1040</td><td>Budi Hartono</td><td>New account setup</td><td><span class="badge badge-blue">Low</span></td><td><span class="badge badge-green">Resolved</span></td></tr>
-              <tr><td>#IT-1039</td><td>Sari Wijaya</td><td>Printer not responding</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-green">Resolved</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>🖥️ Asset Inventory</h3>
-            <button class="btn btn-primary">+ Add Asset</button>
-          </div>
-          <table class="table">
-            <thead>
-              <tr><th>Asset</th><th>Type</th><th>Assigned To</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>MacBook Pro 14"</td><td>Laptop</td><td>Andi Setiawan</td><td><span class="badge badge-green">Active</span></td></tr>
-              <tr><td>Dell Monitor 27"</td><td>Monitor</td><td>Rina Putri</td><td><span class="badge badge-green">Active</span></td></tr>
-              <tr><td>HP LaserJet Pro</td><td>Printer</td><td>3F — Marketing</td><td><span class="badge badge-orange">Maintenance</span></td></tr>
-              <tr><td>ThinkPad X1 Carbon</td><td>Laptop</td><td>Unassigned</td><td><span class="badge badge-blue">Available</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Software Licenses -->
       <div class="card">
-        <div class="card-header">
-          <h3>🔑 Software Licenses</h3>
-          <a href="#" class="card-link">Manage all</a>
-        </div>
+        <div class="card-header"><h3>🎂 Upcoming Birthdays</h3></div>
         <table class="table">
-          <thead><tr><th>Software</th><th>License Type</th><th>Total Seats</th><th>Used</th><th>Expiry</th><th>Status</th></tr></thead>
+          <thead><tr><th>Name</th><th>Dept</th><th>Birthday</th></tr></thead>
           <tbody>
-            <tr><td>Microsoft 365</td><td>Enterprise E3</td><td>250</td><td>248</td><td>Mar 2027</td><td><span class="badge badge-green">Active</span></td></tr>
-            <tr><td>Slack</td><td>Business+</td><td>250</td><td>245</td><td>Jun 2027</td><td><span class="badge badge-green">Active</span></td></tr>
-            <tr><td>Adobe Creative Cloud</td><td>Teams</td><td>30</td><td>28</td><td>Jan 2027</td><td><span class="badge badge-green">Active</span></td></tr>
-            <tr><td>Zoom</td><td>Business</td><td>50</td><td>50</td><td>Dec 2026</td><td><span class="badge badge-orange">Renew Soon</span></td></tr>
+            <tr><td>— (connect Employee DB)</td><td>—</td><td>—</td></tr>
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- GA (General Affairs) Section -->
-    <section id="section-ga" class="section">
-      <!-- Stats Cards -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon blue">🏢</div>
-          <div class="stat-info">
-            <div class="stat-value">5</div>
-            <div class="stat-label">Office Locations</div>
-            <div class="stat-change neutral">→ Jakarta, Surabaya, Bali, Medan, Bandung</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon green">🚗</div>
-          <div class="stat-info">
-            <div class="stat-value">Rp 42.5M</div>
-            <div class="stat-label">Transport Expenses (Oct)</div>
-            <div class="stat-change negative">↑ 8% vs last month</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon orange">📋</div>
-          <div class="stat-info">
-            <div class="stat-value">14</div>
-            <div class="stat-label">Pending Requests</div>
-            <div class="stat-change positive">↓ 3 from last week</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon purple">🎂</div>
-          <div class="stat-info">
-            <div class="stat-value">7</div>
-            <div class="stat-label">Birthdays This Month</div>
-            <div class="stat-change neutral">→ Gifts & cakes scheduled</div>
-          </div>
-        </div>
-      </div>
+</main>
 
-      <!-- Transport & Facility Requests -->
-      <div class="mid-grid">
-        <div class="card">
-          <div class="card-header">
-            <h3>🚗 Transport Expenses</h3>
-            <button class="btn btn-primary">+ Submit Expense</button>
-          </div>
-          <table class="table">
-            <thead>
-              <tr><th>Employee</th><th>Service</th><th>Route</th><th>Fare</th><th>Date</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Andi Setiawan</td><td><span class="badge badge-green">Grab</span></td><td>Home → Office</td><td>Rp 45,000</td><td>Oct 28</td><td><span class="badge badge-green">Approved</span></td></tr>
-              <tr><td>Rina Putri</td><td><span class="badge badge-blue">Gojek</span></td><td>Office → Client</td><td>Rp 62,000</td><td>Oct 28</td><td><span class="badge badge-orange">Pending</span></td></tr>
-              <tr><td>Sari Wijaya</td><td><span class="badge badge-green">Grab</span></td><td>Office → Home</td><td>Rp 38,000</td><td>Oct 27</td><td><span class="badge badge-green">Approved</span></td></tr>
-              <tr><td>Budi Hartono</td><td><span class="badge badge-blue">Gojek</span></td><td>Home → Office</td><td>Rp 52,000</td><td>Oct 27</td><td><span class="badge badge-green">Approved</span></td></tr>
-            </tbody>
-          </table>
-        </div>
+<script>
+// ── Real data from Lark Base ───────────────────────────────────────────────
+const RAW = {"pt_list":["PT Adhikari Semesta Abadi","PT Aliansi Data Semesta","PT Froyo Kreatif Indonesia","PT Jingga Kreasi Multiguna","PT Kharisma Jingga Kreasi","PT Lajur Bintang Multiguna","PT Langit Bimasakti Multiguna","PT Menuju Bulan Multiguna","PT Orca Performa Multiguna","PT Pesona Bintang Multiguna","PT Sisi Karya Multiguna","PT Teman Dekat Sejahtera","Pusat"],"pt_short":{"PT Jingga Kreasi Multiguna":"Jingga","PT Langit Bimasakti Multiguna":"Langit","PT Sisi Karya Multiguna":"Sisi","PT Menuju Bulan Multiguna":"Menuju Bulan","PT Kharisma Jingga Kreasi":"Kharisma","PT Lajur Bintang Multiguna":"Lajur","PT Aliansi Data Semesta":"Aliansi","Pusat":"Pusat"},"months":["2013-01","2013-06","2013-08","2015-01","2015-02","2015-05","2015-06","2015-10","2016-01","2016-04","2016-05","2016-06","2016-07","2016-09","2016-10","2017-07","2017-10","2017-11","2018-01","2018-06","2018-07","2018-08","2018-09","2019-01","2019-04","2019-06","2019-07","2019-09","2019-10","2019-12","2020-01","2020-02","2020-03","2020-07","2020-09","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09"],"global":{"total_active":235,"probation":123,"contract":38,"permanent":387,"intern":93,"join_by_month":{"2024-05":23,"2013-06":1,"2013-08":1,"2015-01":2,"2015-02":1,"2024-01":15,"2015-06":2,"2015-10":1,"2016-01":1,"2016-04":1,"2016-06":1,"2016-07":1,"2016-09":1,"2017-10":1,"2017-11":5,"2018-01":2,"2018-07":1,"2018-08":1,"2019-04":2,"2019-06":4,"2019-07":4,"2019-09":1,"2019-10":2,"2019-12":3,"2020-01":2,"2020-02":2,"2020-09":1,"2020-11":8,"2020-12":1,"2021-01":2,"2021-02":8,"2021-03":4,"2021-04":3,"2021-06":2,"2021-07":2,"2021-08":6,"2021-09":6,"2021-10":4,"2021-11":10,"2021-12":4,"2022-01":11,"2022-02":15,"2023-06":12,"2022-03":18,"2022-04":12,"2022-05":14,"2022-06":6,"2022-07":21,"2022-08":12,"2022-09":31,"2022-10":23,"2022-11":18,"2013-01":6,"2015-05":1,"2022-12":8,"2023-01":9,"2023-02":16,"2023-03":8,"2023-04":4,"2023-05":22,"2023-07":13,"2023-08":12,"2023-09":17,"2023-10":7,"2023-11":6,"2023-12":3,"2016-05":2,"2017-07":1,"2018-06":1,"2018-09":1,"2019-01":1,"2016-10":1,"2020-03":1,"2020-07":1,"2021-05":1,"2024-02":11,"2024-03":8,"2024-04":11,"2024-06":26,"2024-07":18,"2024-08":24,"2024-09":14,"2024-10":24,"2024-11":12,"2024-12":11,"2025-01":5},"resign_by_month":{"2025-01":6,"2024-05":19,"2024-03":7,"2023-12":17,"2024-07":12,"2023-03":15,"2023-02":11,"2024-04":9,"2023-11":6,"2024-12":90,"2023-06":13,"2024-02":7,"2024-10":16,"2023-09":21,"2024-06":9,"2023-04":10,"2024-09":27,"2023-05":24,"2022-11":6,"2023-10":5,"2025-02":1,"2023-01":13,"2024-01":13,"2023-07":7,"2024-08":18,"2024-11":7,"2022-12":10,"2023-08":9}},"payroll_by_month":{"2025-01":6136443948.0,"2024-12":2685522138.0,"2025-02":6671288492.0,"2025-03":7310006009.0,"2025-04":6337557736.0,"2025-06":6228352712.0,"2025-05":6211861063.0,"2025-07":6397718334.0,"2025-09":6513642384.0,"2025-08":6403313651.0,"2025-10":6594806226.0,"2025-11":6431687728.0,"2025-12":6392800819.0,"2026-01":6775924293.0,"2026-02":2964773396.0,"2026-04":3018021762.0,"2026-05":2917440201.0,"2026-03":3317583534.0,"2026-06":4533672056.0,"2026-07":4560142100.0,"2026-08":4550123298.0,"2026-09":4425004178.0},"pt_stats":{"PT Adhikari Semesta Abadi":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2024-05":1},"resign_by_month":{"2024-12":1}},"PT Aliansi Data Semesta":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2022-09":1,"2013-01":1},"resign_by_month":{"2022-11":1,"2022-12":1}},"PT Froyo Kreatif Indonesia":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2016-05":2,"2022-07":9,"2017-07":1,"2017-11":1,"2018-01":1,"2018-06":1,"2018-09":1,"2019-04":1,"2019-01":1,"2016-10":1,"2019-06":1,"2019-07":1,"2019-12":1,"2020-02":1,"2020-03":1,"2020-07":1,"2020-11":1,"2021-02":2,"2021-03":1,"2021-04":2,"2021-05":1,"2021-07":1,"2021-09":1,"2021-10":1,"2021-11":2,"2021-12":1,"2022-02":3,"2022-03":1,"2022-05":1,"2022-06":3,"2022-08":1,"2022-09":4,"2022-10":4,"2022-11":1,"2022-12":2,"2023-01":1,"2023-02":2,"2023-05":2,"2023-06":1,"2023-07":1,"2023-08":2,"2023-09":3,"2024-05":8,"2024-02":2,"2024-03":1,"2024-04":3,"2024-06":2,"2024-07":7,"2024-08":6,"2024-09":4,"2024-10":4,"2024-11":3,"2024-12":5},"resign_by_month":{"2024-12":81,"2024-08":8,"2024-01":3,"2024-07":3,"2024-09":3,"2024-04":2,"2024-02":3,"2024-10":3,"2024-05":4,"2024-06":2,"2025-01":2,"2024-11":1}},"PT Jingga Kreasi Multiguna":{"total":116,"probation":15,"contract":9,"permanent":82,"intern":10,"join_by_month":{"2024-05":3,"2015-01":2,"2015-06":1,"2016-06":1,"2016-07":1,"2016-09":1,"2017-10":1,"2018-08":1,"2019-06":1,"2019-07":1,"2019-10":2,"2020-01":1,"2020-02":1,"2020-09":1,"2020-11":4,"2021-02":2,"2021-03":1,"2021-04":1,"2021-08":2,"2021-09":1,"2021-10":1,"2021-11":3,"2021-12":2,"2022-01":3,"2022-02":3,"2023-06":1,"2022-03":1,"2022-04":4,"2022-05":4,"2022-07":1,"2022-08":4,"2022-09":4,"2022-10":3,"2023-01":2,"2023-02":1,"2023-04":1,"2023-08":1,"2023-03":1,"2024-02":2,"2023-09":1,"2024-03":1,"2024-04":6,"2024-06":5,"2024-07":3,"2024-08":6,"2024-09":7,"2024-10":10,"2024-11":5,"2024-12":3,"2025-01":4},"resign_by_month":{"2025-01":4,"2025-02":1,"2024-12":1}},"PT Kharisma Jingga Kreasi":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2019-12":1},"resign_by_month":{"2023-03":1}},"PT Lajur Bintang Multiguna":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2021-03":1,"2022-02":1,"2022-03":6,"2022-07":1,"2022-10":1,"2022-11":1,"2013-01":1,"2023-01":2,"2023-02":4,"2023-03":2,"2023-04":1,"2023-05":1,"2023-06":1,"2023-07":2,"2023-09":2,"2023-11":1},"resign_by_month":{"2023-06":2,"2023-10":2,"2023-12":6,"2024-01":4,"2023-01":1,"2023-02":2,"2023-03":2,"2023-05":3,"2023-07":2,"2023-11":1,"2023-08":2,"2023-09":1}},"PT Langit Bimasakti Multiguna":{"total":23,"probation":2,"contract":0,"permanent":20,"intern":1,"join_by_month":{"2021-02":2,"2021-09":1,"2021-11":2,"2022-03":2,"2022-04":1,"2022-05":1,"2022-06":1,"2022-10":1,"2022-11":1,"2022-12":1,"2023-02":1,"2023-03":1,"2023-05":1,"2023-06":1,"2023-07":1,"2023-08":1,"2023-09":1,"2023-12":1,"2024-01":2,"2024-02":3,"2024-03":2,"2024-05":2,"2024-06":3,"2024-08":1,"2024-10":1,"2024-12":1},"resign_by_month":{"2024-12":1,"2024-05":5,"2024-04":3,"2024-03":1,"2024-06":1,"2024-08":1,"2024-09":1}},"PT Menuju Bulan Multiguna":{"total":11,"probation":4,"contract":0,"permanent":7,"intern":0,"join_by_month":{"2019-06":1,"2022-01":1,"2023-02":1,"2024-01":3,"2024-05":1,"2024-07":1,"2024-10":3,"2024-11":1},"resign_by_month":{"2024-08":1}},"PT Orca Performa Multiguna":{"total":13,"probation":7,"contract":0,"permanent":6,"intern":0,"join_by_month":{"2023-07":2,"2023-08":1,"2023-09":1,"2023-11":1,"2024-01":1,"2024-05":1,"2024-07":1,"2024-08":3,"2024-09":1,"2024-10":4,"2024-11":2,"2024-12":1},"resign_by_month":{"2024-08":2,"2024-06":1,"2024-10":1,"2024-07":1,"2024-12":1}},"PT Pesona Bintang Multiguna":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2023-05":12,"2023-06":5,"2023-07":3},"resign_by_month":{"2023-09":14,"2023-08":4,"2023-05":1,"2023-06":1}},"PT Sisi Karya Multiguna":{"total":22,"probation":2,"contract":2,"permanent":18,"intern":0,"join_by_month":{"2017-11":2,"2020-11":1,"2021-06":1,"2021-07":1,"2021-08":1,"2022-02":2,"2022-05":1,"2022-06":1,"2022-07":5,"2022-08":3,"2022-09":3,"2022-11":1,"2013-01":3,"2023-03":1,"2023-05":2,"2023-07":4,"2023-08":4,"2023-09":7,"2023-10":6,"2023-11":4,"2023-12":2,"2024-01":7,"2024-03":2,"2024-09":1,"2024-10":1,"2025-01":1},"resign_by_month":{"2023-12":5,"2024-06":2,"2024-07":2,"2023-11":3,"2022-11":2,"2023-06":1,"2023-02":1,"2023-05":2,"2024-11":2,"2022-12":2,"2023-03":3,"2023-08":2,"2023-10":2,"2023-07":1,"2024-09":2,"2024-05":3,"2024-10":1,"2024-01":4,"2024-04":2,"2024-02":2,"2024-03":1}},"PT Teman Dekat Sejahtera":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2024-06":13,"2024-08":1},"resign_by_month":{"2024-09":14}},"Pusat":{"total":48,"probation":3,"contract":7,"permanent":38,"intern":0,"join_by_month":{"2024-05":7,"2013-06":1,"2013-08":1,"2015-02":1,"2024-01":2,"2015-10":1,"2016-01":1,"2016-04":1,"2017-11":2,"2018-01":1,"2018-07":1,"2019-04":1,"2019-06":1,"2019-07":2,"2019-09":1,"2019-12":1,"2020-01":1,"2020-11":2,"2020-12":1,"2021-01":2,"2021-02":2,"2021-03":1,"2021-06":1,"2021-08":3,"2021-09":3,"2021-10":2,"2021-11":3,"2021-12":1,"2022-01":7,"2022-02":6,"2022-03":8,"2022-04":7,"2022-05":7,"2022-07":5,"2022-08":4,"2022-09":19,"2022-10":14,"2022-11":14,"2013-01":1,"2015-06":1,"2015-05":1,"2022-12":5,"2023-02":7,"2022-06":1,"2023-01":4,"2023-03":3,"2023-04":2,"2023-05":4,"2023-06":3,"2023-08":3,"2023-09":2,"2023-10":1,"2024-02":4,"2024-03":2,"2024-04":2,"2024-06":3,"2024-07":6,"2024-08":7,"2024-09":1,"2024-10":1,"2024-11":1,"2024-12":1},"resign_by_month":{"2024-05":7,"2024-03":5,"2023-12":6,"2024-07":6,"2023-02":8,"2024-04":2,"2023-11":2,"2024-02":2,"2024-10":11,"2023-09":6,"2024-06":3,"2023-04":10,"2024-09":7,"2023-06":9,"2023-05":18,"2022-11":3,"2024-12":5,"2023-01":12,"2024-01":2,"2023-07":4,"2023-10":1,"2024-08":6,"2024-11":4,"2023-03":9,"2022-12":7,"2023-08":1}}}};
 
-        <div class="card">
-          <div class="card-header">
-            <h3>📋 Facility Requests</h3>
-            <button class="btn btn-primary">+ New Request</button>
-          </div>
-          <table class="table">
-            <thead>
-              <tr><th>Request</th><th>Category</th><th>Location</th><th>Priority</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>AC repair — 5th floor</td><td>Maintenance</td><td>Jakarta HQ</td><td><span class="badge badge-red">High</span></td><td><span class="badge badge-orange">In Progress</span></td></tr>
-              <tr><td>Meeting room booking system</td><td>Facility</td><td>All Offices</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-blue">Planned</span></td></tr>
-              <tr><td>Pantry restock — coffee</td><td>Supplies</td><td>Jakarta HQ</td><td><span class="badge badge-blue">Low</span></td><td><span class="badge badge-green">Done</span></td></tr>
-              <tr><td>Parking lot gate repair</td><td>Maintenance</td><td>Surabaya</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-orange">Pending</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+// ── Sections & routing ────────────────────────────────────────────────────
+const SECTIONS = ['dashboard','employees','payroll','leave','recruitment','performance','it','ga'];
+const TITLES   = {
+  dashboard:'Dashboard', employees:'Employees', payroll:'Payroll',
+  leave:'Leave Management', recruitment:'Recruitment', performance:'Performance Reviews',
+  it:'IT', ga:'General Affairs'
+};
 
-      <!-- Birthday Management -->
-      <div class="card">
-        <div class="card-header">
-          <h3>🎂 Birthday Management — October 2026</h3>
-          <a href="#" class="card-link">View all months</a>
-        </div>
-        <table class="table">
-          <thead><tr><th>Employee</th><th>Department</th><th>Birthday</th><th>Gift</th><th>Cake</th><th>Budget</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr><td><div class="employee-cell"><div class="avatar">DK</div> Dian Kusuma</div></td><td>HR</td><td>Oct 5</td><td>Voucher</td><td>Chocolate</td><td>Rp 350,000</td><td><span class="badge badge-green">Delivered</span></td></tr>
-            <tr><td><div class="employee-cell"><div class="avatar">RP</div> Rina Putri</div></td><td>Marketing</td><td>Oct 15</td><td>Voucher</td><td>Red Velvet</td><td>Rp 350,000</td><td><span class="badge badge-green">Delivered</span></td></tr>
-            <tr><td><div class="employee-cell"><div class="avatar">FH</div> Fajar Hidayat</div></td><td>Engineering</td><td>Oct 22</td><td>Voucher</td><td>Tiramisu</td><td>Rp 350,000</td><td><span class="badge badge-green">Delivered</span></td></tr>
-            <tr><td><div class="employee-cell"><div class="avatar">NW</div> Nadia Wijaya</div></td><td>Finance</td><td>Oct 30</td><td>Voucher</td><td>Cheese Cake</td><td>Rp 350,000</td><td><span class="badge badge-orange">Scheduled</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+let chartPayroll, chartHires, chartStatus;
+let selectedPT = 'ALL', monthFrom = '', monthTo = '';
 
-  <script src="app.js"></script>
+function showSection(name, el) {
+  SECTIONS.forEach(s => document.getElementById('section-'+s)?.classList.remove('active'));
+  document.getElementById('section-'+name)?.classList.add('active');
+  document.getElementById('page-title').textContent = TITLES[name] || name;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('filter-bar').classList.toggle('visible', name === 'dashboard');
+  document.getElementById('data-badge').style.display = name === 'dashboard' ? '' : 'none';
+  event?.preventDefault();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+const MNAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtM(ym) { if(!ym) return ''; const [y,m]=ym.split('-'); return `${MNAMES[+m-1]} ${y}`; }
+function fmtRp(n) {
+  if(!n) return 'Rp 0';
+  if(n>=1e9) return `Rp ${(n/1e9).toFixed(2)}B`;
+  if(n>=1e6) return `Rp ${(n/1e6).toFixed(1)}M`;
+  return `Rp ${n.toLocaleString('id')}`;
+}
+function inRange(m) {
+  if(monthFrom && m<monthFrom) return false;
+  if(monthTo   && m>monthTo)   return false;
+  return true;
+}
+function getMonths() {
+  return [...new Set([
+    ...Object.keys(RAW.payroll_by_month),
+    ...Object.keys(RAW.global.join_by_month),
+    ...Object.keys(RAW.global.resign_by_month),
+  ])].sort().filter(inRange);
+}
+function setDelta(id, val, upGood, curr=false) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const s = val>=0?'+':'';
+  el.textContent = curr ? `${s}${fmtRp(Math.abs(val))}` : `${s}${val}`;
+  el.className = 'stat-delta '+(val===0?'delta-flat':(val>0)===upGood?'delta-up':'delta-down');
+}
+
+// ── Init filters ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // PT options
+  const ptSel = document.getElementById('pt-filter');
+  RAW.pt_list.filter(pt => (RAW.pt_stats[pt]?.total||0) > 0).forEach(pt => {
+    const o = document.createElement('option');
+    o.value = pt; o.textContent = pt.replace('PT ','');
+    ptSel.appendChild(o);
+  });
+
+  // Month options
+  const allM = [...new Set([
+    ...Object.keys(RAW.payroll_by_month),
+    ...Object.keys(RAW.global.join_by_month),
+    ...Object.keys(RAW.global.resign_by_month),
+  ])].sort();
+  const recent = allM.slice(-24);
+
+  [document.getElementById('month-from'), document.getElementById('month-to')].forEach((sel,si) => {
+    recent.forEach(m => { const o=document.createElement('option'); o.value=m; o.textContent=fmtM(m); sel.appendChild(o); });
+    sel.value = si===0 ? recent[recent.length-12]||recent[0] : recent[recent.length-1];
+  });
+  monthFrom = document.getElementById('month-from').value;
+  monthTo   = document.getElementById('month-to').value;
+
+  document.getElementById('pt-filter').addEventListener('change',  e => { selectedPT=e.target.value; render(); });
+  document.getElementById('month-from').addEventListener('change', e => { monthFrom=e.target.value; render(); });
+  document.getElementById('month-to').addEventListener('change',   e => { monthTo=e.target.value; render(); });
+
+  render();
+  buildRecruitTable();
+});
+
+function resetFilters() {
+  selectedPT='ALL'; document.getElementById('pt-filter').value='ALL';
+  const mf=document.getElementById('month-from'), mt=document.getElementById('month-to');
+  monthFrom=mf.options[1]?.value||''; monthTo=mt.options[mt.options.length-1]?.value||'';
+  mf.value=monthFrom; mt.value=monthTo; render();
+}
+
+// ── Render dashboard ──────────────────────────────────────────────────────
+function render() {
+  const months = getMonths();
+  const ptD    = selectedPT==='ALL' ? RAW.global : (RAW.pt_stats[selectedPT]||RAW.global);
+  const jm = ptD.join_by_month||{}, rm = ptD.resign_by_month||{};
+
+  document.getElementById('filter-label').textContent =
+    `📍 ${selectedPT==='ALL'?'Semua PT':selectedPT.replace('PT ','')}  ·  ${fmtM(monthFrom)} – ${fmtM(monthTo)}`;
+
+  // Stats
+  const totJ = months.reduce((s,m)=>s+(jm[m]||0),0);
+  const totR = months.reduce((s,m)=>s+(rm[m]||0),0);
+  const totP = months.reduce((s,m)=>s+(RAW.payroll_by_month[m]||0),0);
+
+  document.getElementById('d-total').textContent  = (ptD.total||0).toLocaleString();
+  document.getElementById('d-join').textContent   = totJ.toLocaleString();
+  document.getElementById('d-resign').textContent = totR.toLocaleString();
+  document.getElementById('d-prob').textContent   = (ptD.probation||0).toLocaleString();
+  document.getElementById('d-cont').textContent   = (ptD.contract||0).toLocaleString();
+  document.getElementById('d-pay').textContent    = fmtRp(totP);
+
+  if(months.length>=2) {
+    const last=months[months.length-1], prev=months[months.length-2];
+    setDelta('d-delta-join',   (jm[last]||0)-(jm[prev]||0), true);
+    setDelta('d-delta-resign', (rm[last]||0)-(rm[prev]||0), false);
+    setDelta('d-delta-pay',    (RAW.payroll_by_month[last]||0)-(RAW.payroll_by_month[prev]||0), true, true);
+  }
+
+  renderPayrollChart(months);
+  renderHiresChart(months, ptD);
+  renderStatusChart(ptD);
+  renderMonthlyTable(months, ptD);
+  renderPTTable(months);
+}
+
+function renderPayrollChart(months) {
+  const ctx=document.getElementById('chartPayroll').getContext('2d');
+  if(chartPayroll) chartPayroll.destroy();
+  chartPayroll=new Chart(ctx,{
+    type:'line',
+    data:{labels:months.map(fmtM),datasets:[{
+      label:'Total THP (B)',data:months.map(m=>(RAW.payroll_by_month[m]||0)/1e9),
+      borderColor:'#4f46e5',backgroundColor:'rgba(79,70,229,.08)',
+      fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:'#4f46e5'
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Rp ${c.raw.toFixed(2)}B`}}},
+      scales:{y:{ticks:{callback:v=>`Rp ${v.toFixed(1)}B`},grid:{color:'#f4f6fb'}},x:{grid:{display:false}}}
+    }
+  });
+}
+
+function renderHiresChart(months, ptD) {
+  const ctx=document.getElementById('chartHires').getContext('2d');
+  if(chartHires) chartHires.destroy();
+  chartHires=new Chart(ctx,{
+    type:'bar',
+    data:{labels:months.map(fmtM),datasets:[
+      {label:'Masuk', data:months.map(m=>ptD.join_by_month?.[m]||0),   backgroundColor:'rgba(16,185,129,.75)',borderRadius:4},
+      {label:'Keluar',data:months.map(m=>ptD.resign_by_month?.[m]||0), backgroundColor:'rgba(239,68,68,.75)', borderRadius:4},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11}}}},
+      scales:{y:{beginAtZero:true,grid:{color:'#f4f6fb'}},x:{grid:{display:false}}}
+    }
+  });
+}
+
+function renderStatusChart(ptD) {
+  const ctx=document.getElementById('chartStatus').getContext('2d');
+  if(chartStatus) chartStatus.destroy();
+  chartStatus=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels:['Permanent','Contract','Probation','Internship'],
+      datasets:[{data:[ptD.permanent||0,ptD.contract||0,ptD.probation||0,ptD.intern||0],
+        backgroundColor:['#4f46e5','#f97316','#f59e0b','#10b981'],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
+      plugins:{legend:{position:'right',labels:{font:{size:11},padding:12}}}
+    }
+  });
+}
+
+function renderMonthlyTable(months, ptD) {
+  const jm=ptD.join_by_month||{}, rm=ptD.resign_by_month||{}, pm=RAW.payroll_by_month||{};
+  const tbody=document.getElementById('monthly-tbody'); tbody.innerHTML='';
+  [...months].reverse().slice(0,24).forEach((m,i,arr) => {
+    const prev=arr[i+1];
+    const j=jm[m]||0, r=rm[m]||0, net=j-r, pay=pm[m]||0, pp=prev?pm[prev]||0:0;
+    const d=pay-pp, pct=pp>0?((Math.abs(d)/pp)*100).toFixed(1):'—';
+    const dStr=prev?`<span class="${d>=0?'pos':'neg'}">${d>=0?'↑':'↓'} ${fmtRp(Math.abs(d))} (${pct}%)</span>`:'—';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${fmtM(m)}</strong></td>
+      <td style="text-align:right" class="pos">${j>0?'+'+j:j}</td>
+      <td style="text-align:right" class="neg">${r>0?'-'+r:r}</td>
+      <td style="text-align:right" class="${net>0?'pos':net<0?'neg';}">${net>0?'+':''}${net}</td>
+      <td style="text-align:right" class="payroll-cell">${pay?fmtRp(pay):'—'}</td>
+      <td style="text-align:right">${dStr}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderPTTable(months) {
+  const tbody=document.getElementById('pt-tbody'); tbody.innerHTML='';
+  RAW.pt_list.forEach(pt => {
+    const s=RAW.pt_stats[pt]; if(!s) return;
+    const j=months.reduce((a,m)=>a+(s.join_by_month?.[m]||0),0);
+    const r=months.reduce((a,m)=>a+(s.resign_by_month?.[m]||0),0);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${pt.replace('PT ','')}</strong><br><span style="font-size:.72rem;color:#9ca3af">${pt}</span></td>
+      <td style="text-align:right"><strong>${s.total}</strong></td>
+      <td style="text-align:right">${s.permanent||0}</td>
+      <td style="text-align:right">${s.contract||0}</td>
+      <td style="text-align:right">${s.probation||0}</td>
+      <td style="text-align:right">${s.intern||0}</td>
+      <td style="text-align:right" class="${j>0?'pos':''}">${j>0?'+'+j:j}</td>
+      <td style="text-align:right" class="${r>0?'neg':''}">${r>0?'-'+r:r}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function buildRecruitTable() {
+  const tbody=document.getElementById('recruit-tbody'); if(!tbody) return;
+  const jm=RAW.global.join_by_month, rm=RAW.global.resign_by_month;
+  const months=[...new Set([...Object.keys(jm),...Object.keys(rm)])].sort().reverse().slice(0,12);
+  months.forEach(m => {
+    const j=jm[m]||0, r=rm[m]||0, net=j-r;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${fmtM(m)}</strong></td>
+      <td style="text-align:right" class="pos">${j>0?'+'+j:j}</td>
+      <td style="text-align:right" class="neg">${r>0?'-'+r:r}</td>
+      <td style="text-align:right" class="${net>0?'pos':net<0?'neg':''}">${net>0?'+':''}${net}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+</script>
 </body>
 </html>
