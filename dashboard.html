@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HR Dashboard — FCN Group</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* ── Dashboard-specific overrides ── */
+    .filter-bar {
+      display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+      background: #fff; padding: 1rem 2rem;
+      border-bottom: 1px solid #e8ecf4; position: sticky; top: 64px; z-index: 9;
+    }
+    .filter-bar label { font-size: 0.8rem; font-weight: 600; color: #6b7280; }
+    .filter-select {
+      padding: 0.5rem 0.85rem; border: 1.5px solid #e8ecf4; border-radius: 8px;
+      font-size: 0.85rem; background: #fff; cursor: pointer; outline: none;
+      transition: border-color .2s; font-family: inherit;
+    }
+    .filter-select:focus { border-color: #4f46e5; }
+    .filter-group { display: flex; align-items: center; gap: 0.5rem; }
+    .reset-btn {
+      padding: 0.45rem 0.9rem; background: #f3f4f6; border: none;
+      border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      color: #374151; transition: background .2s;
+    }
+    .reset-btn:hover { background: #e5e7eb; }
+
+    /* ── Stats ── */
+    .stats-6 {
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    @media (max-width: 1200px) { .stats-6 { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 768px)  { .stats-6 { grid-template-columns: repeat(2, 1fr); } }
+
+    .stat-card { border-radius: 14px; padding: 1.1rem 1.25rem; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem; }
+    .stat-icon-sm { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .stat-delta { font-size: .72rem; font-weight: 600; padding: .15rem .45rem; border-radius: 20px; }
+    .delta-up   { background: #d1fae5; color: #065f46; }
+    .delta-down { background: #fee2e2; color: #b91c1c; }
+    .delta-flat { background: #f3f4f6; color: #6b7280; }
+    .stat-num { font-size: 1.65rem; font-weight: 700; line-height: 1; }
+    .stat-lbl { font-size: .75rem; color: #6b7280; margin-top: .2rem; }
+
+    /* ── Charts grid ── */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+    .chart-card { background: #fff; border-radius: 16px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .chart-card h3 { font-size: .95rem; font-weight: 600; margin-bottom: 1rem; }
+    .chart-wrap { position: relative; height: 240px; }
+    .chart-full { grid-column: 1 / -1; }
+
+    /* ── Table ── */
+    .monthly-table-wrap { overflow-x: auto; }
+    .monthly-table th { white-space: nowrap; }
+    .payroll-cell { font-weight: 600; color: #4f46e5; }
+    .pos { color: #10b981; font-weight: 600; }
+    .neg { color: #ef4444; font-weight: 600; }
+
+    /* ── No data ── */
+    .no-data { text-align: center; padding: 3rem; color: #9ca3af; font-size: .9rem; }
+
+    /* ── Back btn ── */
+    .back-btn { font-size: .8rem; color: #6b7280; text-decoration: none; display: flex; align-items: center; gap: .3rem; }
+    .back-btn:hover { color: #4f46e5; }
+
+    /* ── Legend ── */
+    .legend-row { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-bottom: .75rem; }
+    .legend-item { display: flex; align-items: center; gap: .35rem; font-size: .78rem; color: #374151; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  </style>
+</head>
+<body>
+<!-- Sidebar (reuse) -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">🏢</span>
+    <span class="logo-text">FCN Group</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="dashboard.html" class="nav-item active"><span class="nav-icon">📈</span> HR Analytics</a>
+    <a href="index.html#employees" class="nav-item"><span class="nav-icon">👥</span> Employees</a>
+    <a href="index.html#payroll" class="nav-item"><span class="nav-icon">💰</span> Payroll</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar">VM</div>
+    <div class="user-info">
+      <div class="user-name">Veronika M.</div>
+      <div class="user-role">HR Operations</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <!-- Header -->
+  <header class="header">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <div class="header-title">📈 HR Analytics Dashboard</div>
+      <span style="font-size:.75rem;background:#e0e7ff;color:#4338ca;padding:.2rem .6rem;border-radius:20px;font-weight:600;">Live Data · Lark Base</span>
+    </div>
+    <div class="header-actions">
+      <span id="last-updated" style="font-size:.78rem;color:#9ca3af;"></span>
+    </div>
+  </header>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>PT / Opco</label>
+      <select class="filter-select" id="pt-filter">
+        <option value="ALL">Semua PT</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Periode</label>
+      <select class="filter-select" id="month-from">
+        <option value="">Dari</option>
+      </select>
+      <span style="color:#9ca3af">—</span>
+      <select class="filter-select" id="month-to">
+        <option value="">Sampai</option>
+      </select>
+    </div>
+    <button class="reset-btn" onclick="resetFilters()">↺ Reset</button>
+    <span id="filter-label" style="font-size:.78rem;color:#6b7280;margin-left:auto;"></span>
+  </div>
+
+  <!-- Content -->
+  <section style="padding:1.75rem 2rem;">
+
+    <!-- Stats Row -->
+    <div class="stats-6" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon-sm blue">👥</div>
+          <span class="stat-delta delta-flat" id="delta-total">—</span>
+        </div>
+        <div class="stat-num" id="stat-total">—</div>
+        <div class="stat-lbl">Total Karyawan Aktif</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon-sm green">🟢</div>
+          <span class="stat-delta delta-flat" id="delta-join">—</span>
+        </div>
+        <div class="stat-num" id="stat-join">—</div>
+        <div class="stat-lbl">Karyawan Masuk</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon-sm" style="background:#fee2e2">🔴</div>
+          <span class="stat-delta delta-flat" id="delta-resign">—</span>
+        </div>
+        <div class="stat-num" id="stat-resign">—</div>
+        <div class="stat-lbl">Karyawan Keluar</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon-sm orange">⏳</div>
+          <span class="stat-delta delta-flat" id="delta-prob">—</span>
+        </div>
+        <div class="stat-num" id="stat-prob">—</div>
+        <div class="stat-lbl">Probation</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon-sm purple">📋</div>
+          <span class="stat-delta delta-flat" id="delta-cont">—</span>
+        </div>
+        <div class="stat-num" id="stat-cont">—</div>
+        <div class="stat-lbl">Kontrak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon-sm green">💰</div>
+          <span class="stat-delta delta-flat" id="delta-payroll">—</span>
+        </div>
+        <div class="stat-num" id="stat-payroll" style="font-size:1.2rem">—</div>
+        <div class="stat-lbl">Total Payroll (Periode)</div>
+      </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="charts-grid">
+      <!-- Payroll Trend -->
+      <div class="chart-card chart-full">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+          <h3>💰 Payroll Movement — Total Take Home Pay</h3>
+        </div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="chartPayroll"></canvas>
+        </div>
+      </div>
+
+      <!-- Hires vs Resign -->
+      <div class="chart-card">
+        <h3>👥 Karyawan Masuk vs Keluar</h3>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Masuk</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> Keluar</div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chartHires"></canvas>
+        </div>
+      </div>
+
+      <!-- Employee Status -->
+      <div class="chart-card">
+        <h3>📋 Status Karyawan</h3>
+        <div class="chart-wrap">
+          <canvas id="chartStatus"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- PT Breakdown -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-header">
+        <h3>🏢 Breakdown per PT / Opco</h3>
+      </div>
+      <div class="monthly-table-wrap">
+        <table class="table" id="pt-table">
+          <thead>
+            <tr>
+              <th>PT / Opco</th>
+              <th style="text-align:right">Total Aktif</th>
+              <th style="text-align:right">Permanent</th>
+              <th style="text-align:right">Kontrak</th>
+              <th style="text-align:right">Probation</th>
+              <th style="text-align:right">Intern</th>
+              <th style="text-align:right">Masuk (Periode)</th>
+              <th style="text-align:right">Keluar (Periode)</th>
+            </tr>
+          </thead>
+          <tbody id="pt-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Monthly Table -->
+    <div class="card">
+      <div class="card-header">
+        <h3>📅 Data Bulanan</h3>
+      </div>
+      <div class="monthly-table-wrap">
+        <table class="table" id="monthly-table">
+          <thead>
+            <tr>
+              <th>Bulan</th>
+              <th style="text-align:right">Masuk</th>
+              <th style="text-align:right">Keluar</th>
+              <th style="text-align:right">Net</th>
+              <th style="text-align:right">Total Payroll</th>
+              <th style="text-align:right">vs Bulan Lalu</th>
+            </tr>
+          </thead>
+          <tbody id="monthly-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<script>
+// ── Embedded data from Lark Base ───────────────────────────────────────────
+const RAW = {"pt_list":["PT Adhikari Semesta Abadi","PT Aliansi Data Semesta","PT Froyo Kreatif Indonesia","PT Jingga Kreasi Multiguna","PT Kharisma Jingga Kreasi","PT Lajur Bintang Multiguna","PT Langit Bimasakti Multiguna","PT Menuju Bulan Multiguna","PT Orca Performa Multiguna","PT Pesona Bintang Multiguna","PT Sisi Karya Multiguna","PT Teman Dekat Sejahtera","Pusat"],"pt_short":{"PT Jingga Kreasi Multiguna":"Jingga","PT Langit Bimasakti Multiguna":"Langit","PT Sisi Karya Multiguna":"Sisi","PT Menuju Bulan Multiguna":"Menuju Bulan","PT Kharisma Jingga Kreasi":"Kharisma","PT Lajur Bintang Multiguna":"Lajur","PT Aliansi Data Semesta":"Aliansi","Pusat":"Pusat"},"months":["2013-01","2013-06","2013-08","2015-01","2015-02","2015-05","2015-06","2015-10","2016-01","2016-04","2016-05","2016-06","2016-07","2016-09","2016-10","2017-07","2017-10","2017-11","2018-01","2018-06","2018-07","2018-08","2018-09","2019-01","2019-04","2019-06","2019-07","2019-09","2019-10","2019-12","2020-01","2020-02","2020-03","2020-07","2020-09","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09"],"global":{"total_active":235,"probation":123,"contract":38,"permanent":387,"intern":93,"join_by_month":{"2024-05":23,"2013-06":1,"2013-08":1,"2015-01":2,"2015-02":1,"2024-01":15,"2015-06":2,"2015-10":1,"2016-01":1,"2016-04":1,"2016-06":1,"2016-07":1,"2016-09":1,"2017-10":1,"2017-11":5,"2018-01":2,"2018-07":1,"2018-08":1,"2019-04":2,"2019-06":4,"2019-07":4,"2019-09":1,"2019-10":2,"2019-12":3,"2020-01":2,"2020-02":2,"2020-09":1,"2020-11":8,"2020-12":1,"2021-01":2,"2021-02":8,"2021-03":4,"2021-04":3,"2021-06":2,"2021-07":2,"2021-08":6,"2021-09":6,"2021-10":4,"2021-11":10,"2021-12":4,"2022-01":11,"2022-02":15,"2023-06":12,"2022-03":18,"2022-04":12,"2022-05":14,"2022-06":6,"2022-07":21,"2022-08":12,"2022-09":31,"2022-10":23,"2022-11":18,"2013-01":6,"2015-05":1,"2022-12":8,"2023-01":9,"2023-02":16,"2023-03":8,"2023-04":4,"2023-05":22,"2023-07":13,"2023-08":12,"2023-09":17,"2023-10":7,"2023-11":6,"2023-12":3,"2016-05":2,"2017-07":1,"2018-06":1,"2018-09":1,"2019-01":1,"2016-10":1,"2020-03":1,"2020-07":1,"2021-05":1,"2024-02":11,"2024-03":8,"2024-04":11,"2024-06":26,"2024-07":18,"2024-08":24,"2024-09":14,"2024-10":24,"2024-11":12,"2024-12":11,"2025-01":5},"resign_by_month":{"2025-01":6,"2024-05":19,"2024-03":7,"2023-12":17,"2024-07":12,"2023-03":15,"2023-02":11,"2024-04":9,"2023-11":6,"2024-12":90,"2023-06":13,"2024-02":7,"2024-10":16,"2023-09":21,"2024-06":9,"2023-04":10,"2024-09":27,"2023-05":24,"2022-11":6,"2023-10":5,"2025-02":1,"2023-01":13,"2024-01":13,"2023-07":7,"2024-08":18,"2024-11":7,"2022-12":10,"2023-08":9}},"payroll_by_month":{"2025-01":6136443948.0,"2024-12":2685522138.0,"2025-02":6671288492.0,"2025-03":7310006009.0,"2025-04":6337557736.0,"2025-06":6228352712.0,"2025-05":6211861063.0,"2025-07":6397718334.0,"2025-09":6513642384.0,"2025-08":6403313651.0,"2025-10":6594806226.0,"2025-11":6431687728.0,"2025-12":6392800819.0,"2026-01":6775924293.0,"2026-02":2964773396.0,"2026-04":3018021762.0,"2026-05":2917440201.0,"2026-03":3317583534.0,"2026-06":4533672056.0,"2026-07":4560142100.0,"2026-08":4550123298.0,"2026-09":4425004178.0},"pt_stats":{"PT Adhikari Semesta Abadi":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2024-05":1},"resign_by_month":{"2024-12":1}},"PT Aliansi Data Semesta":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2022-09":1,"2013-01":1},"resign_by_month":{"2022-11":1,"2022-12":1}},"PT Froyo Kreatif Indonesia":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2016-05":2,"2022-07":9,"2017-07":1,"2017-11":1,"2018-01":1,"2018-06":1,"2018-09":1,"2019-04":1,"2019-01":1,"2016-10":1,"2019-06":1,"2019-07":1,"2019-12":1,"2020-02":1,"2020-03":1,"2020-07":1,"2020-11":1,"2021-02":2,"2021-03":1,"2021-04":2,"2021-05":1,"2021-07":1,"2021-09":1,"2021-10":1,"2021-11":2,"2021-12":1,"2022-02":3,"2022-03":1,"2022-05":1,"2022-06":3,"2022-08":1,"2022-09":4,"2022-10":4,"2022-11":1,"2022-12":2,"2023-01":1,"2023-02":2,"2023-05":2,"2023-06":1,"2023-07":1,"2023-08":2,"2023-09":3,"2024-05":8,"2024-02":2,"2024-03":1,"2024-04":3,"2024-06":2,"2024-07":7,"2024-08":6,"2024-09":4,"2024-10":4,"2024-11":3,"2024-12":5},"resign_by_month":{"2024-12":81,"2024-08":8,"2024-01":3,"2024-07":3,"2024-09":3,"2024-04":2,"2024-02":3,"2024-10":3,"2024-05":4,"2024-06":2,"2025-01":2,"2024-11":1}},"PT Jingga Kreasi Multiguna":{"total":116,"probation":15,"contract":9,"permanent":82,"intern":10,"join_by_month":{"2024-05":3,"2015-01":2,"2015-06":1,"2016-06":1,"2016-07":1,"2016-09":1,"2017-10":1,"2018-08":1,"2019-06":1,"2019-07":1,"2019-10":2,"2020-01":1,"2020-02":1,"2020-09":1,"2020-11":4,"2021-02":2,"2021-03":1,"2021-04":1,"2021-08":2,"2021-09":1,"2021-10":1,"2021-11":3,"2021-12":2,"2022-01":3,"2022-02":3,"2023-06":1,"2022-03":1,"2022-04":4,"2022-05":4,"2022-07":1,"2022-08":4,"2022-09":4,"2022-10":3,"2023-01":2,"2023-02":1,"2023-04":1,"2023-08":1,"2023-03":1,"2024-02":2,"2023-09":1,"2024-03":1,"2024-04":6,"2024-06":5,"2024-07":3,"2024-08":6,"2024-09":7,"2024-10":10,"2024-11":5,"2024-12":3,"2025-01":4},"resign_by_month":{"2025-01":4,"2025-02":1,"2024-12":1}},"PT Kharisma Jingga Kreasi":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2019-12":1},"resign_by_month":{"2023-03":1}},"PT Lajur Bintang Multiguna":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2021-03":1,"2022-02":1,"2022-03":6,"2022-07":1,"2022-10":1,"2022-11":1,"2013-01":1,"2023-01":2,"2023-02":4,"2023-03":2,"2023-04":1,"2023-05":1,"2023-06":1,"2023-07":2,"2023-09":2,"2023-11":1},"resign_by_month":{"2023-06":2,"2023-10":2,"2023-12":6,"2024-01":4,"2023-01":1,"2023-02":2,"2023-03":2,"2023-05":3,"2023-07":2,"2023-11":1,"2023-08":2,"2023-09":1}},"PT Langit Bimasakti Multiguna":{"total":23,"probation":2,"contract":0,"permanent":20,"intern":1,"join_by_month":{"2021-02":2,"2021-09":1,"2021-11":2,"2022-03":2,"2022-04":1,"2022-05":1,"2022-06":1,"2022-10":1,"2022-11":1,"2022-12":1,"2023-02":1,"2023-03":1,"2023-05":1,"2023-06":1,"2023-07":1,"2023-08":1,"2023-09":1,"2023-12":1,"2024-01":2,"2024-02":3,"2024-03":2,"2024-05":2,"2024-06":3,"2024-08":1,"2024-10":1,"2024-12":1},"resign_by_month":{"2024-12":1,"2024-05":5,"2024-04":3,"2024-03":1,"2024-06":1,"2024-08":1,"2024-09":1}},"PT Menuju Bulan Multiguna":{"total":11,"probation":4,"contract":0,"permanent":7,"intern":0,"join_by_month":{"2019-06":1,"2022-01":1,"2023-02":1,"2024-01":3,"2024-05":1,"2024-07":1,"2024-10":3,"2024-11":1},"resign_by_month":{"2024-08":1}},"PT Orca Performa Multiguna":{"total":13,"probation":7,"contract":0,"permanent":6,"intern":0,"join_by_month":{"2023-07":2,"2023-08":1,"2023-09":1,"2023-11":1,"2024-01":1,"2024-05":1,"2024-07":1,"2024-08":3,"2024-09":1,"2024-10":4,"2024-11":2,"2024-12":1},"resign_by_month":{"2024-08":2,"2024-06":1,"2024-10":1,"2024-07":1,"2024-12":1}},"PT Pesona Bintang Multiguna":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2023-05":12,"2023-06":5,"2023-07":3},"resign_by_month":{"2023-09":14,"2023-08":4,"2023-05":1,"2023-06":1}},"PT Sisi Karya Multiguna":{"total":22,"probation":2,"contract":2,"permanent":18,"intern":0,"join_by_month":{"2017-11":2,"2020-11":1,"2021-06":1,"2021-07":1,"2021-08":1,"2022-02":2,"2022-05":1,"2022-06":1,"2022-07":5,"2022-08":3,"2022-09":3,"2022-11":1,"2013-01":3,"2023-03":1,"2023-05":2,"2023-07":4,"2023-08":4,"2023-09":7,"2023-10":6,"2023-11":4,"2023-12":2,"2024-01":7,"2024-03":2,"2024-09":1,"2024-10":1,"2025-01":1},"resign_by_month":{"2023-12":5,"2024-06":2,"2024-07":2,"2023-11":3,"2022-11":2,"2023-06":1,"2023-02":1,"2023-05":2,"2024-11":2,"2022-12":2,"2023-03":3,"2023-08":2,"2023-10":2,"2023-07":1,"2024-09":2,"2024-05":3,"2024-10":1,"2024-01":4,"2024-04":2,"2024-02":2,"2024-03":1}},"PT Teman Dekat Sejahtera":{"total":0,"probation":0,"contract":0,"permanent":0,"intern":0,"join_by_month":{"2024-06":13,"2024-08":1},"resign_by_month":{"2024-09":14}},"Pusat":{"total":48,"probation":3,"contract":7,"permanent":38,"intern":0,"join_by_month":{"2024-05":7,"2013-06":1,"2013-08":1,"2015-02":1,"2024-01":2,"2015-10":1,"2016-01":1,"2016-04":1,"2017-11":2,"2018-01":1,"2018-07":1,"2019-04":1,"2019-06":1,"2019-07":2,"2019-09":1,"2019-12":1,"2020-01":1,"2020-11":2,"2020-12":1,"2021-01":2,"2021-02":2,"2021-03":1,"2021-06":1,"2021-08":3,"2021-09":3,"2021-10":2,"2021-11":3,"2021-12":1,"2022-01":7,"2022-02":6,"2022-03":8,"2022-04":7,"2022-05":7,"2022-07":5,"2022-08":4,"2022-09":19,"2022-10":14,"2022-11":14,"2013-01":1,"2015-06":1,"2015-05":1,"2022-12":5,"2023-02":7,"2022-06":1,"2023-01":4,"2023-03":3,"2023-04":2,"2023-05":4,"2023-06":3,"2023-08":3,"2023-09":2,"2023-10":1,"2024-02":4,"2024-03":2,"2024-04":2,"2024-06":3,"2024-07":6,"2024-08":7,"2024-09":1,"2024-10":1,"2024-11":1,"2024-12":1},"resign_by_month":{"2024-05":7,"2024-03":5,"2023-12":6,"2024-07":6,"2023-02":8,"2024-04":2,"2023-11":2,"2024-02":2,"2024-10":11,"2023-09":6,"2024-06":3,"2023-04":10,"2024-09":7,"2023-06":9,"2023-05":18,"2022-11":3,"2024-12":5,"2023-01":12,"2024-01":2,"2023-07":4,"2023-10":1,"2024-08":6,"2024-11":4,"2023-03":9,"2022-12":7,"2023-08":1}}}};
+
+// ── State ──────────────────────────────────────────────────────────────────
+let selectedPT = 'ALL';
+let monthFrom  = '';
+let monthTo    = '';
+
+// Chart instances
+let chartPayroll, chartHires, chartStatus;
+
+// ── Init ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('last-updated').textContent = 'Data per Oktober 2026';
+  populateFilters();
+  render();
+});
+
+function populateFilters() {
+  const ptSel = document.getElementById('pt-filter');
+  const activePTs = RAW.pt_list.filter(pt => RAW.pt_stats[pt] && RAW.pt_stats[pt].total > 0);
+  activePTs.forEach(pt => {
+    const o = document.createElement('option');
+    o.value = pt;
+    o.textContent = pt.replace('PT ', '');
+    ptSel.appendChild(o);
+  });
+
+  // Months: use last 24 months from payroll + hires union
+  const allMonths = [...new Set([
+    ...Object.keys(RAW.payroll_by_month),
+    ...Object.keys(RAW.global.join_by_month),
+    ...Object.keys(RAW.global.resign_by_month),
+  ])].sort();
+
+  const recent = allMonths.slice(-24);
+
+  [document.getElementById('month-from'), document.getElementById('month-to')].forEach((sel, si) => {
+    recent.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m;
+      o.textContent = fmtMonth(m);
+      sel.appendChild(o);
+    });
+    if (si === 0) sel.value = recent[recent.length - 12] || recent[0];
+    else          sel.value = recent[recent.length - 1];
+  });
+
+  monthFrom = document.getElementById('month-from').value;
+  monthTo   = document.getElementById('month-to').value;
+
+  document.getElementById('pt-filter').addEventListener('change',    e => { selectedPT = e.target.value; render(); });
+  document.getElementById('month-from').addEventListener('change',   e => { monthFrom  = e.target.value; render(); });
+  document.getElementById('month-to').addEventListener('change',     e => { monthTo    = e.target.value; render(); });
+}
+
+function resetFilters() {
+  selectedPT = 'ALL';
+  document.getElementById('pt-filter').value = 'ALL';
+  const mf = document.getElementById('month-from');
+  const mt = document.getElementById('month-to');
+  monthFrom = mf.options[1]?.value || '';
+  monthTo   = mt.options[mt.options.length - 1]?.value || '';
+  mf.value = monthFrom;
+  mt.value = monthTo;
+  render();
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function fmtMonth(ym) {
+  if (!ym) return '';
+  const [y, m] = ym.split('-');
+  const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${names[parseInt(m)-1]} ${y}`;
+}
+
+function fmtRp(n) {
+  if (!n) return 'Rp 0';
+  if (n >= 1e9) return `Rp ${(n/1e9).toFixed(1)}B`;
+  if (n >= 1e6) return `Rp ${(n/1e6).toFixed(1)}M`;
+  return `Rp ${n.toLocaleString('id')}`;
+}
+
+function inRange(m) {
+  if (monthFrom && m < monthFrom) return false;
+  if (monthTo   && m > monthTo)   return false;
+  return true;
+}
+
+function getMonthsInRange() {
+  const all = [...new Set([
+    ...Object.keys(RAW.payroll_by_month),
+    ...Object.keys(RAW.global.join_by_month),
+    ...Object.keys(RAW.global.resign_by_month),
+  ])].sort().filter(inRange);
+  return all;
+}
+
+function getPTData() {
+  if (selectedPT === 'ALL') return RAW.global;
+  return RAW.pt_stats[selectedPT] || RAW.global;
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  const months = getMonthsInRange();
+  const ptData = getPTData();
+
+  // Filter label
+  const label = selectedPT === 'ALL' ? 'Semua PT' : selectedPT;
+  document.getElementById('filter-label').textContent =
+    `📍 ${label}  ·  ${fmtMonth(monthFrom)} – ${fmtMonth(monthTo)}`;
+
+  renderStats(months, ptData);
+  renderPayrollChart(months);
+  renderHiresChart(months, ptData);
+  renderStatusChart(ptData);
+  renderMonthlyTable(months, ptData);
+  renderPTTable(months);
+}
+
+function renderStats(months, ptData) {
+  const jm = ptData.join_by_month   || {};
+  const rm = ptData.resign_by_month || {};
+
+  const totalJoin   = months.reduce((s, m) => s + (jm[m] || 0), 0);
+  const totalResign = months.reduce((s, m) => s + (rm[m] || 0), 0);
+  const totalPayroll = months.reduce((s, m) => s + (RAW.payroll_by_month[m] || 0), 0);
+
+  document.getElementById('stat-total').textContent   = (ptData.total || 0).toLocaleString();
+  document.getElementById('stat-join').textContent    = totalJoin.toLocaleString();
+  document.getElementById('stat-resign').textContent  = totalResign.toLocaleString();
+  document.getElementById('stat-prob').textContent    = (ptData.probation || 0).toLocaleString();
+  document.getElementById('stat-cont').textContent    = (ptData.contract  || 0).toLocaleString();
+  document.getElementById('stat-payroll').textContent = fmtRp(totalPayroll);
+
+  // Deltas: compare last month vs prev month
+  if (months.length >= 2) {
+    const last = months[months.length - 1];
+    const prev = months[months.length - 2];
+    const jDelta = (jm[last]||0) - (jm[prev]||0);
+    const rDelta = (rm[last]||0) - (rm[prev]||0);
+    const pLast  = RAW.payroll_by_month[last] || 0;
+    const pPrev  = RAW.payroll_by_month[prev] || 0;
+    const pDelta = pLast - pPrev;
+
+    setDelta('delta-join',    jDelta, true);
+    setDelta('delta-resign',  rDelta, false);
+    setDelta('delta-payroll', pDelta, true, true);
+  }
+}
+
+function setDelta(id, val, upIsGood, currency=false) {
+  const el = document.getElementById(id);
+  const sign = val >= 0 ? '+' : '';
+  el.textContent = currency ? `${sign}${fmtRp(Math.abs(val))}` : `${sign}${val}`;
+  el.className = 'stat-delta ' + (val === 0 ? 'delta-flat' : (val > 0) === upIsGood ? 'delta-up' : 'delta-down');
+}
+
+function renderPayrollChart(months) {
+  const labels = months.map(fmtMonth);
+  const values = months.map(m => (RAW.payroll_by_month[m] || 0) / 1e9);
+
+  const ctx = document.getElementById('chartPayroll').getContext('2d');
+  if (chartPayroll) chartPayroll.destroy();
+  chartPayroll = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Total THP (Miliar Rp)',
+        data: values,
+        borderColor: '#4f46e5',
+        backgroundColor: 'rgba(79,70,229,.08)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#4f46e5',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => `Rp ${c.raw.toFixed(2)}B` } }
+      },
+      scales: {
+        y: { ticks: { callback: v => `Rp ${v.toFixed(1)}B` }, grid: { color: '#f4f6fb' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderHiresChart(months, ptData) {
+  const labels  = months.map(fmtMonth);
+  const joins   = months.map(m => ptData.join_by_month?.[m]   || 0);
+  const resigns = months.map(m => ptData.resign_by_month?.[m] || 0);
+
+  const ctx = document.getElementById('chartHires').getContext('2d');
+  if (chartHires) chartHires.destroy();
+  chartHires = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Masuk',  data: joins,   backgroundColor: 'rgba(16,185,129,.75)', borderRadius: 4 },
+        { label: 'Keluar', data: resigns, backgroundColor: 'rgba(239,68,68,.75)',  borderRadius: 4 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { font: { size: 11 } } } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f4f6fb' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderStatusChart(ptData) {
+  const ctx = document.getElementById('chartStatus').getContext('2d');
+  if (chartStatus) chartStatus.destroy();
+  chartStatus = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Permanent', 'Contract', 'Probation', 'Internship'],
+      datasets: [{
+        data: [
+          ptData.permanent  || 0,
+          ptData.contract   || 0,
+          ptData.probation  || 0,
+          ptData.intern     || 0,
+        ],
+        backgroundColor: ['#4f46e5','#f97316','#f59e0b','#10b981'],
+        borderWidth: 0,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { font: { size: 11 }, padding: 12 } }
+      },
+      cutout: '60%',
+    }
+  });
+}
+
+function renderMonthlyTable(months, ptData) {
+  const jm = ptData.join_by_month   || {};
+  const rm = ptData.resign_by_month || {};
+  const pm = RAW.payroll_by_month   || {};
+
+  const tbody = document.getElementById('monthly-tbody');
+  tbody.innerHTML = '';
+
+  const showMonths = [...months].reverse().slice(0, 24);
+
+  showMonths.forEach((m, i) => {
+    const prevM = showMonths[i + 1];
+    const join   = jm[m] || 0;
+    const resign = rm[m] || 0;
+    const net    = join - resign;
+    const pay    = pm[m] || 0;
+    const prevPay = prevM ? (pm[prevM] || 0) : 0;
+    const payDelta = pay - prevPay;
+    const payPct   = prevPay > 0 ? ((payDelta / prevPay) * 100).toFixed(1) : null;
+
+    const netClass    = net > 0 ? 'pos' : net < 0 ? 'neg' : '';
+    const deltaClass  = payDelta >= 0 ? 'pos' : 'neg';
+    const deltaStr    = payPct !== null
+      ? `${payDelta >= 0 ? '↑' : '↓'} ${fmtRp(Math.abs(payDelta))} (${Math.abs(payPct)}%)`
+      : '—';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${fmtMonth(m)}</strong></td>
+      <td style="text-align:right" class="pos">${join > 0 ? '+' + join : join}</td>
+      <td style="text-align:right" class="neg">${resign > 0 ? '-' + resign : resign}</td>
+      <td style="text-align:right" class="${netClass}">${net > 0 ? '+' : ''}${net}</td>
+      <td style="text-align:right" class="payroll-cell">${pay ? fmtRp(pay) : '—'}</td>
+      <td style="text-align:right" class="${deltaClass}">${prevM ? deltaStr : '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderPTTable(months) {
+  const tbody = document.getElementById('pt-tbody');
+  tbody.innerHTML = '';
+
+  const activePTs = RAW.pt_list.filter(pt => RAW.pt_stats[pt]);
+  activePTs.forEach(pt => {
+    const s = RAW.pt_stats[pt];
+    const join   = months.reduce((acc, m) => acc + (s.join_by_month?.[m]   || 0), 0);
+    const resign = months.reduce((acc, m) => acc + (s.resign_by_month?.[m] || 0), 0);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${pt.replace('PT ', '')}</strong><br><span style="font-size:.72rem;color:#9ca3af">${pt}</span></td>
+      <td style="text-align:right"><strong>${s.total}</strong></td>
+      <td style="text-align:right">${s.permanent || 0}</td>
+      <td style="text-align:right">${s.contract  || 0}</td>
+      <td style="text-align:right">${s.probation || 0}</td>
+      <td style="text-align:right">${s.intern    || 0}</td>
+      <td style="text-align:right" class="${join > 0 ? 'pos' : ''}">${join > 0 ? '+' + join : join}</td>
+      <td style="text-align:right" class="${resign > 0 ? 'neg' : ''}">${resign > 0 ? '-' + resign : resign}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+</script>
+</body>
+</html>
